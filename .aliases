@@ -1,7 +1,7 @@
 #   -----------------------------
 #     Git
 #   -----------------------------
-alias readGit='for commit in $(git rev-list master --reverse); do git checkout $commit; read; done'
+alias gitRead='for commit in $(git rev-list master --reverse); do git checkout $commit; read; done'
 alias undopush="git push -f origin HEAD^:master"
 
 #   -----------------------------
@@ -29,6 +29,7 @@ alias dsp='docker system prune -f -a --volumes'
 #   -----------------------------
 #      MAKE TERMINAL BETTER
 #   -----------------------------
+alias reload='source ~/.bash_profile'
 alias brewBomb='brew update && brew upgrade && brew cleanup'
 alias cp='cp -iv'                                        # Preferred 'cp' implementation
 alias mv='mv -iv'                                        # Preferred 'mv' implementation
