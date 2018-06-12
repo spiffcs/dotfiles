@@ -1,7 +1,7 @@
 git pull
-read -p "This may overwrite some files in your home directory that already exist. Are you sure you want to proceed? (y/n)" -n 1
+read -p "This may overwrite existing files in your home directory. Are you sure? (y/n) " -n 1
 echo
-if [[$REPLY =~ ^[Yy]$]]; then
-  rsync --exclude ".git/" --exclude ".DS_Store" --exclude ".osx" --exclude "bootstrap.sh" --exclude "README.md" -av . ~
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+  rsync --exclude ".git/" --exclude ".DS_Store" --exclude "bootstrap.sh" --exclude "README.md" -av . ~
 fi
 source "$HOME/.bash_profile"
