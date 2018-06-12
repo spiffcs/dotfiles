@@ -3,10 +3,10 @@ export EDITOR="vim"
 # Don’t clear the screen after quitting a manual page
 export MANPAGER="less -X"
 
-# Larger bash history (allow 32³ entries; default is 500)
-export HISTSIZE=32768
+export HISTSIZE=32768         # Larger bash history (allow 32³ entries; default is 500)
 export HISTFILESIZE=$HISTSIZE
 export HISTCONTROL=ignoredups
+export HISTIGNORE="ls:ls *"   # Make some commands not show up in history
 
 # dunno what to do with this yet
 source ~/.git-completion.bash
