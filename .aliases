@@ -2,6 +2,7 @@
 #     Git
 #   -----------------------------
 alias readGit='for commit in $(git rev-list master --reverse); do git checkout $commit; read; done'
+alias undopush="git push -f origin HEAD^:master"
 
 #   -----------------------------
 #     Golang
@@ -33,6 +34,7 @@ alias cp='cp -iv'                                        # Preferred 'cp' implem
 alias mv='mv -iv'                                        # Preferred 'mv' implementation
 alias mkdir='mkdir -pv'                                  # Preferred 'mkdir' implementation
 alias ll='ls -FGlAhp'                                    # Preferred 'ls' implementation
+alias lsd='ls -l | grep "^d"'                            # List only Directories
 alias less='less -FSRXc'                                 # Preferred 'less' implementation
 alias rm='rm -i'                                         # Preferred 'rm' implementation
 cd() { builtin cd "$@"; ll; }                            # Always list directory contents upon 'cd'
