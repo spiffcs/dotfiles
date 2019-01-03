@@ -11,6 +11,8 @@ alias goSp='cd ~/go/src/github.com/spiff90'
 alias gt='ginkgo watch -v -r '
 alias coverage='go test -tags test -coverprofile=coverage.out'
 alias viewCoverage='go tool cover -html=coverage.out'
+alias gtvc="go test -v -cover"
+alias todo="godoc -notes="TODO" ."
 
 #   -----------------------------
 #    Python
