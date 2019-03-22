@@ -1,26 +1,33 @@
 [apply]
     whitespace = fix
+
 [core]
 	excludesfile = ~/.gitignore
 	attributesfile = ~/.gitattributes
-	whitespace = fix,space-before-tab,tab-in-indent,trailing-space
+    whitespace = fix,space-before-tab,tab-in-indent,trailing-space
+
 [color]
-	ui = auto
+    ui = auto
+
 [color "branch"]
 	current = yellow reverse
 	local = yellow
-	remote = green
+    remote = green
+
 [color "diff"]
 	meta = yellow bold
 	frag = magenta bold
 	old = red bold
-	new = green bold
+    new = green bold
+
 [color "status"]
 	added = yellow
 	changed = green
-	untracked = cyan
+    untracked = cyan
+
 [merge]
-	log = true
+    log = true
+
 [alias]
     l = log --pretty=format:"%C(yellow)%h\\ %ad%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=short
     a = add
@@ -40,4 +47,6 @@
     # list aliases
     la = "!git config -l | grep alias | cut -c 7-"
 
-
+[user]
+	name = Christopher Phillips
+	email = cphillips918@gmail.com
