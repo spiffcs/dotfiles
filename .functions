@@ -12,6 +12,7 @@ function httpcompression() {
 function json() {
      python -mjson.tool <<< "$*"| pygmentize -l javascript
 }
+
 # All the dig info
 function digga() {
   dig +nocmd "$1" any +multiline +noall +answer

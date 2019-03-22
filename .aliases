@@ -7,12 +7,10 @@ alias undopush="git push -f origin HEAD^:master"
 #   -----------------------------
 #     Golang
 #   -----------------------------
-alias goSp='cd ~/go/src/github.com/spiff90'
+alias goSp='cd ~/go/src/github.com/spiffcs'
 alias gt='ginkgo watch -v -r '
 alias coverage='go test -tags test -coverprofile=coverage.out'
 alias viewCoverage='go tool cover -html=coverage.out'
-alias gtvc="go test -v -cover"
-alias todo="godoc -notes="TODO" ."
 
 #   -----------------------------
 #    Python
@@ -30,6 +28,7 @@ alias dsp='docker system prune -f -a --volumes'
 #   -----------------------------
 #      MAKE TERMINAL BETTER
 #   -----------------------------
+alias vim='nvim'
 alias projects='cd ~/development'
 alias reload='source ~/.bash_profile'
 alias brewBomb='brew update && brew upgrade && brew cleanup'
