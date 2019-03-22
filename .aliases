@@ -30,7 +30,7 @@ alias dsp='docker system prune -f -a --volumes'
 #   -----------------------------
 alias vim='nvim'
 alias projects='cd ~/development'
-alias reload='source ~/.bash_profile'
+alias reload='source ~/.zshrc'
 alias brewBomb='brew update && brew upgrade && brew cleanup'
 alias cp='cp -iv'                                        # Preferred 'cp' implementation
 alias mv='mv -iv'                                        # Preferred 'mv' implementation
