@@ -1,4 +1,4 @@
-## Installation
+## Installation - DEPRICATED - ALL UPSTREAM NOW IN config repo
 
 ```bash
 git clone https://github.com/spiffcs/dotfiles.git && cd dotfiles && ./bootstrap.sh
