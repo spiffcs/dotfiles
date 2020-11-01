@@ -1,0 +1,85 @@
+// -*- mode: json -*-
+
+{
+    "layer": "top",
+    "position": "top",
+    "modules-left": [
+	"sway/workspaces",
+	"sway/mode"
+    ],
+    "modules-right": [
+	"pulseaudio",
+	"network",
+	"memory",
+	"cpu",
+	"backlight",
+	"battery",
+	"clock",
+	"disk",
+	"tray"
+    ],
+    "sway/workspaces": {
+	"disable-scroll": true,
+	"format": "{name}"
+    },
+    "clock": {
+        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+        "format": " {:%a, %d %b    %H:%M}"
+    },
+    "cpu": {
+        "format": " {usage}%",
+        "states": {
+            "warning": 70,
+            "critical": 90
+        }
+    },
+    "memory": {
+        "format": " {}%",
+        "states": {
+            "warning": 70,
+            "critical": 90
+        }
+    },
+    "backlight": {
+        "format": "{icon} {percent}%",
+        "format-icons": [""]
+    },
+    "battery": {
+        "bat": "BAT0",
+        "states": {
+            "warning": 30,
+            "critical": 15
+        },
+        "format": "{icon} {capacity}%",
+        "format-charging": " {capacity}%",
+        "format-alt": "{time} {icon}",
+        "format-icons": ["", "", "", "", ""]
+    },
+    "network": {
+        "interval": 2,
+        "interface": "wlan0",
+        "format-wifi": " {essid}",
+        "format-ethernet": " {ifname}",
+        "format-linked": " {ifname}",
+        "format-disconnected": "  ",
+        "tooltip-format": "{ifname}: {ipaddr}/{cidr}\n {bandwidthDownBits}\n {bandwidthUpBits}"
+    },
+    "pulseaudio": {
+        "format": "{icon} {volume}%   {format_source}",
+        "format-bluetooth": "{icon} {volume}%   {format_source}",
+        "format-bluetooth-muted": " {icon}   {format_source}",
+        "format-muted": "   {format_source}",
+        "format-source": " {volume}%",
+        "format-source-muted": "",
+        "format-icons": {
+            "headphone": "",
+            "hands-free": "",
+            "headset": "",
+            "phone": "",
+            "portable": "",
+            "car": "",
+            "default": ["", "", ""]
+        },
+        "on-click": "pavucontrol"
+    }
+}

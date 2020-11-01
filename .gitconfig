@@ -2,27 +2,28 @@
     whitespace = fix
 
 [core]
-	excludesfile = ~/.gitignore
-	attributesfile = ~/.gitattributes
+    excludesfile = ~/.gitignore
+    attributesfile = ~/.gitattributes
     whitespace = fix,space-before-tab,tab-in-indent,trailing-space
+	editor = nvim
 
 [color]
     ui = auto
 
 [color "branch"]
-	current = yellow reverse
-	local = yellow
+    current = yellow reverse
+    local = yellow
     remote = green
 
 [color "diff"]
-	meta = yellow bold
-	frag = magenta bold
-	old = red bold
+    meta = yellow bold
+    frag = magenta bold
+    old = red bold
     new = green bold
 
 [color "status"]
-	added = yellow
-	changed = green
+    added = yellow
+    changed = green
     untracked = cyan
 
 [merge]
@@ -48,5 +49,5 @@
     la = "!git config -l | grep alias | cut -c 7-"
 
 [user]
-	name = Christopher Phillips
-	email = cphillips918@gmail.com
+    name = Christopher Phillips
+    email = cphillips918@gmail.com

@@ -1,10 +1,2 @@
-# Make vim the default editor
-export EDITOR="vim"
-
-export GOPATH=$HOME/go
-export PATH="$PATH:$GOPATH/bin"
-export PATH="$(brew --prefix coreutils)/libexec/gnubin:/usr/local/bin:$PATH"
-
-# GPG_TTY variable fix: See here: https://www.gnupg.org/documentation/manuals/gnupg/Invoking-GPG_002dAGENT.html
-GPG_TTY=$(tty)
-export GPG_TTY
+# Make nvim the default editor
+export EDITOR="nvim"

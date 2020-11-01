@@ -2,28 +2,12 @@
 #     Git
 #   -----------------------------
 alias gitRead='for commit in $(git rev-list master --reverse); do git checkout $commit; read; done'
-alias undopush="git push -f origin HEAD^:master"
 
 #   -----------------------------
 #     Golang
 #   -----------------------------
-alias goSp='cd ~/go/src/github.com/spiffcs'
-alias gt='ginkgo watch -v -r '
 alias coverage='go test -tags test -coverprofile=coverage.out'
 alias viewCoverage='go tool cover -html=coverage.out'
-
-#   -----------------------------
-#    Python
-#   -----------------------------
-alias python='python3'
-alias pip='pip3'
-
-#   -----------------------------
-#    Docker
-#   -----------------------------
-alias dcu='docker-compose up'
-alias dcd='docker-compose down'
-alias dsp='docker system prune -f -a --volumes'
 
 #   -----------------------------
 #      MAKE TERMINAL BETTER
@@ -31,7 +15,6 @@ alias dsp='docker system prune -f -a --volumes'
 alias vim='nvim'
 alias projects='cd ~/development'
 alias reload='source ~/.zshrc'
-alias brewBomb='brew update && brew upgrade && brew cleanup'
 alias cp='cp -iv'                                        # Preferred 'cp' implementation
 alias mv='mv -iv'                                        # Preferred 'mv' implementation
 alias mkdir='mkdir -pv'                                  # Preferred 'mkdir' implementation
@@ -47,9 +30,7 @@ alias .4='cd ../../../../'                               # Go back 4 directory l
 alias .5='cd ../../../../../'                            # Go back 5 directory levels
 alias .6='cd ../../../../../../'                         # Go back 6 directory levels
 alias ~="cd ~"                                           # ~:     Go Home
-alias cl='clear'                                          # c:     Clear terminal display
 mcd () { mkdir -p "$1" && cd "$1"; }                     # mcd:   Makes new Dir and jumps inside
-alias aprve='xattr -dr com.apple.quarantine'             # aprve: Removes apple quarantine
 alias fs="stat -f \"%z bytes\""                          # File Size
 
 #   ---------------------------
@@ -67,12 +48,3 @@ alias ipInfo0='ipconfig getpacket en0'                              # ipInfo0:  
 alias ipInfo1='ipconfig getpacket en1'                              # ipInfo1:      Get info on connections for en1
 alias openPorts='sudo lsof -i | grep LISTEN'                        # openPorts:    All listening connections
 alias showBlocked='sudo ipfw list'                                  # showBlocked:  All ipfw rules inc/ blocked IPs
-for method in GET POST HEAD PUT DELETE; do alias "$method"="lwp-request -m '$method'"; done # This is dope
-
-#   ---------------------------
-#     Funstuff
-#   ---------------------------
-alias rot13='tr a-zA-Z n-za-mN-ZA-M'                     # ROT13-encode text. Works for decoding, too! ;)
-alias stfu="osascript -e 'set volume output muted true'" # http://xkcd.com/530/
-alias pumpitup="osascript -e 'set volume 10'"            # http://xkcd.com/530/
-
