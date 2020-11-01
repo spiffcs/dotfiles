@@ -4,6 +4,34 @@
 #
 # Read `man 5 sway` for a complete reference.
 
+# Set font
+font pango: Taskbar, Cantarell 9
+
+# Gaps
+gaps inner 1
+smart_gaps on
+
+# Borders
+default_border pixel 1
+default_floating_border none
+hide_edge_borders --i3 none
+
+# Color scheme (Gruvbox dark)
+set $color_normal_white  #a89984
+set $color_bright_white  #ebdbb2
+set $color_normal_gray   #222222
+set $color_bright_gray   #3c3836
+set $color_bright_yellow #d79921
+set $color_normal_black  #282828
+set $color_unused        #ff0000
+
+# Colors                  border                 background             text                   indicator            child_border
+client.focused            $color_bright_gray     $color_bright_gray     $color_bright_white    $color_bright_gray   $color_normal_black
+client.focused_inactive   $color_bright_gray     $color_bright_gray     $color_bright_white    $color_bright_gray   $color_normal_black
+client.unfocused          $color_normal_gray     $color_normal_gray     $color_normal_white    $color_normal_gray   $color_normal_black
+client.urgent             $color_bright_yellow   $color_bright_yellow   $color_normal_black    $color_unused        $color_unused
+client.placeholder        $color_unused          $color_unused          $color_unused          $color_unused 
+
 ### Variables
 #
 # Logo key. Use Mod1 for Alt.
@@ -207,4 +235,6 @@ bar {
 	swaybar_command waybar
 }
 
+# Load systemd integration
 include /etc/sway/config.d/*
+exec systemctl --user start sway-session.target
