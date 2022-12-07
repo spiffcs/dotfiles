@@ -1,0 +1,9 @@
+#!/usr/bin/env zsh
+echo "Install all the things"
+pushd $DOTFILES
+for folder in $(echo $STOW_FOLDERS | sed "s/,/ /g")
+do
+    echo "stow $folder"
+    stow --restow $folder
+done
+popd

@@ -1,2 +1,0 @@
-# Make nvim the default editor
-export EDITOR="nvim"

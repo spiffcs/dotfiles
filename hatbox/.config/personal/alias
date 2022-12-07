@@ -1,20 +1,26 @@
-#   -----------------------------
-#     Git
-#   -----------------------------
-alias gitRead='for commit in $(git rev-list master --reverse); do git checkout $commit; read; done'
+#!/usr/bin/env zsh
+alias vim="$VIM"
+alias work="cd ~/work"
+
+alias python="python3"
+alias czp="cat $DOTFILES/zsh/.config/.zsh_profile"
+alias ezp="$VIM $DOTFILES/.zsh_profile"
+# alias etc="$VIM $DOTFILES/awesome-streamerrc/ThePrimeagen/.tmux.conf"
+alias bp="dotFileInstall && source ~/.zshrc"
+# alias evrc="$VIM $DOTFILES/awesome-streamerrc/ThePrimeagen/.vimrc"
+# alias enrc="nvim $DOTFILES/awesome-streamerrc/ThePrimeagen/init.vim --cmd \"cd $DOTFILES/awesome-streamerrc/ThePrimeagen/init.vim\""
+alias cvrc="cat $DOTFILES/vimrc/.vimrc"
+alias dotFileInstall="$DOTFILES/install"
+
+alias pjson="python -mjson.tool"
+alias cclip="xclip -selection clipboard"
+alias pclip="xclip -selection clipboard"
+# alias livestream_screenkey="screenkey -s large --scr 2 -p bottom --geometry 1210x300+712+810";
+# alias yt_screenkey="screenkey -s large --scr 1 -p bottom --geometry 510x300+1412+850";
 
 #   -----------------------------
-#     Golang
+#      MAKE IT BETTER
 #   -----------------------------
-alias coverage='go test -tags test -coverprofile=coverage.out'
-alias viewCoverage='go tool cover -html=coverage.out'
-
-#   -----------------------------
-#      MAKE TERMINAL BETTER
-#   -----------------------------
-alias vim='nvim'
-alias projects='cd ~/development'
-alias reload='source ~/.zshrc'
 alias cp='cp -iv'                                        # Preferred 'cp' implementation
 alias mv='mv -iv'                                        # Preferred 'mv' implementation
 alias mkdir='mkdir -pv'                                  # Preferred 'mkdir' implementation

@@ -1,0 +1,5 @@
+#!/usr/bin/env zsh
+addToPath /usr/local/go/bin
+addToPath $GOPATH/bin
+addToPath $HOME/.cargo/bin
+addToPath $HOME/.rustup
