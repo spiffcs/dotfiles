@@ -7,8 +7,8 @@ for i in `find -L $PERSONAL`; do
     source $i
 done
 
-export CC="clang-12"
-export CXX="clang++-12"
+# export CC="clang-12"
+# export CXX="clang++-12"
 export PYTHONBREAKPOINT="pudb.set_trace"
 export GOPATH=$HOME/go
 export GIT_EDITOR=$VIM
