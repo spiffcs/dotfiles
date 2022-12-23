@@ -27,6 +27,9 @@
 " - Avoid using standard Vim directory names like 'plugin'
 call plug#begin()
 
+" utility
+Plug 'nvim-lua/plenary.nvim'
+
 "ui
 Plug 'morhetz/gruvbox'
 Plug 'vim-airline/vim-airline'
@@ -34,10 +37,17 @@ Plug 'vim-airline/vim-airline-themes'
 Plug 'ntpeters/vim-better-whitespace'
 
 " code
+Plug 'github/copilot.vim'
+Plug 'neovim/nvim-lspconfig'
 
-" Search
+" file explorer
+Plug 'nvim-telescope/telescope.nvim'
 call plug#end()
 
+lua << EOF
+require'lspconfig'.gopls.setup{}
+require'lspconfig'.rust_analyzer.setup{}
+EOF
 """"""""""""""""""""""""""""""""""""""""""""""""""
 " => General
 """"""""""""""""""""""""""""""""""""""""""""""""""
@@ -65,9 +75,6 @@ let mapleader = ","
 
 " Fast saving
 nmap <leader>w :w!<cr>
-
-" nocompatible for vim-ctrlspace
-set nocompatible
 
 " set mouse support for normal and visual mode
 set mouse=nv
@@ -141,12 +148,6 @@ map <C-k> <C-W>k
 map <C-h> <C-W>h
 map <C-l> <C-W>l
 
-" Close the current buffer
-map <leader> bd :Bclose<cr>:tabclose<cr>gT
-
-" Close all the buffers
-map <leader> ba :bufdo bd<cr> :bufdo bd
-
 " Next and Previous buffer
 map <leader>l :bnext<cr>
 map <leader>h :bprevious<cr>
@@ -176,15 +177,8 @@ set ai "Auto indent
 set si "Smart indent
 set wrap "Wrap lines
 
-
 """"""""""""""""""""""""""""""""""""""""""""""""""
-" => vim-ctrlspace
-""""""""""""""""""""""""""""""""""""""""""""""""""
-let g:CtrlSpaceDefaultMappingKey = "<C-space> "
-
-
-""""""""""""""""""""""""""""""""""""""""""""""""""
-" => More stuff
+" => Misc
 """"""""""""""""""""""""""""""""""""""""""""""""""
 " If hidden is not set, TextEdit might fail.
 set hidden
