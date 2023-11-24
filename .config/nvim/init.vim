@@ -10,12 +10,8 @@
 "    -> Colors and Fonts
 "    -> Tabs, Windows and Buffers
 "    -> Text, tab and indent related
-"    -> Nerdtree
-"    -> vim-ctrlspace
-"    -> Coc.nvim
-"    -> Golang
-"    -> Rust
-"    -> Ack searching and cope displaying
+"    -> Misc
+"    -> Telescope
 "
 """"""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -33,6 +29,7 @@ Plug 'nvim-lua/plenary.nvim'
 "ui
 Plug 'morhetz/gruvbox'
 Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
 Plug 'ntpeters/vim-better-whitespace'
 
 " code
@@ -186,7 +183,7 @@ set shortmess+=c
 set signcolumn=yes
 
 """"""""""""""""""""""""""""""""""""""""""""""""""
-" => telescope
+" => Telescope
 """"""""""""""""""""""""""""""""""""""""""""""""""
 " Find files using Telescope command-line sugar.
 nnoremap <leader>ff <cmd>Telescope find_files<cr>
