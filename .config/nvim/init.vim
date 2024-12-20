@@ -23,29 +23,21 @@
 " - Avoid using standard Vim directory names like 'plugin'
 call plug#begin()
 
-" utility
-Plug 'nvim-lua/plenary.nvim'
-
 "ui
 Plug 'morhetz/gruvbox'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'ntpeters/vim-better-whitespace'
+Plug 'preservim/nerdtree'
+
+Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 
 " code
 Plug 'github/copilot.vim'
-Plug 'neovim/nvim-lspconfig'
-
-" file explorer
-Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.0' }
-Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build' }
-Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 call plug#end()
 
-lua << EOF
-require'lspconfig'.gopls.setup{}
-require'lspconfig'.rust_analyzer.setup{}
-EOF
+let g:go_def_mode='gopls'
+let g:go_info_mode='gopls'
 
 """"""""""""""""""""""""""""""""""""""""""""""""""
 " => General
@@ -101,6 +93,11 @@ set magic
 " Show matching brackets when text indivator is over them
 set showmatch
 set mat=2
+
+" Nerdtree
+nnoremap <leader>n :NERDTreeFocus<CR>
+nnoremap <C-n> :NERDTreeToggle<CR>
+nnoremap <C-f> :NERDTreeFind<CR>
 
 """"""""""""""""""""""""""""""""""""""""""""""""""
 " => Colors and Fonts
@@ -181,12 +178,3 @@ set noswapfile
 set updatetime=100
 set shortmess+=c
 set signcolumn=yes
-
-""""""""""""""""""""""""""""""""""""""""""""""""""
-" => Telescope
-""""""""""""""""""""""""""""""""""""""""""""""""""
-" Find files using Telescope command-line sugar.
-nnoremap <leader>ff <cmd>Telescope find_files<cr>
-nnoremap <leader>fg <cmd>Telescope live_grep<cr>
-nnoremap <leader>fb <cmd>Telescope buffers<cr>
-nnoremap <leader>fh <cmd>Telescope help_tags<cr>
