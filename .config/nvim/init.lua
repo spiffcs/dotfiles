@@ -65,7 +65,8 @@ cmp.setup({
     }),
 })
 
--- LSP Configuration
+-- Attach `nvim-cmp` to LSP
+local capabilities = require('cmp_nvim_lsp').default_capabilities()
 local lspconfig = require('lspconfig')
 
 local opts = { noremap = true, silent = true }
@@ -79,11 +80,13 @@ lspconfig.r_language_server.setup{
     cmd = { "R", "--slave", "-e", "languageserver::run()" },
     filetypes = { "r", "rmd" },
     root_dir = lspconfig.util.root_pattern(".git", "."),
+    capabilities = capabilities,
 }
 
 -- Go Language Server setup
 lspconfig.gopls.setup{
     cmd = { "gopls" },
+    capabilities = capabilities,
     filetypes = { "go", "gomod", "gowork", "gotmpl" },
     root_dir = lspconfig.util.root_pattern("go.work", "go.mod", ".git"),
     settings = {
@@ -105,8 +108,26 @@ vim.api.nvim_create_autocmd("BufWritePre", {
     end,
 })
 
+-- Configure OCaml LSP
+lspconfig.ocamllsp.setup{
+    cmd = { "ocamllsp" }, -- Ensure the ocaml-lsp-server binary is in your PATH
+    capabilities = capabilities,
+    filetypes = { "ocaml", "ocamlinterface", "ocamllex" },
+    root_dir = lspconfig.util.root_pattern("*.opam", ".git", "dune-project", "dune-workspace"),
+    settings = {},
+}
+
+-- Ocaml Format on Save
+vim.api.nvim_create_autocmd("BufWritePre", {
+    pattern = "*.ml,*.mli",
+    callback = function()
+        vim.lsp.buf.format()
+    end,
+})
+
+-- Treesitter
 require('nvim-treesitter.configs').setup {
-    ensure_installed = { "r", "go"}, -- Add R for Treesitter
+    ensure_installed = { "r", "go", "ocaml"}, -- Add Languages for Treesitter
     highlight = {
         enable = true, -- Enable syntax highlighting
     },
