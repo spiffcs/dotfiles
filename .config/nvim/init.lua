@@ -13,128 +13,211 @@
 
 -- Plugins
 local ensure_packer = function()
-    local fn = vim.fn
-    local install_path = fn.stdpath('data')..'/site/pack/packer/start/packer.nvim'
-    if fn.empty(fn.glob(install_path)) > 0 then
-        fn.system({'git', 'clone', '--depth', '1', 'https://github.com/wbthomason/packer.nvim', install_path})
-        vim.cmd [[packadd packer.nvim]]
-        return true
-    end
-    return false
+	local fn = vim.fn
+	local install_path = fn.stdpath("data") .. "/site/pack/packer/start/packer.nvim"
+	if fn.empty(fn.glob(install_path)) > 0 then
+		fn.system({
+			"git",
+			"clone",
+			"--depth",
+			"1",
+			"https://github.com/wbthomason/packer.nvim",
+			install_path,
+		})
+		vim.cmd([[packadd packer.nvim]])
+		return true
+	end
+	return false
 end
+
+-- Packages to install
 local packer_bootstrap = ensure_packer()
+require("packer").startup(function(use)
+	-- Plugin management
+	use("wbthomason/packer.nvim") -- Packer can manage itself
 
-require('packer').startup(function(use)
-    -- Plugin management
-    use 'wbthomason/packer.nvim' -- Packer can manage itself
-
-    -- UI
-    use 'morhetz/gruvbox'
-    use 'vim-airline/vim-airline'
-    use 'vim-airline/vim-airline-themes'
-    use 'ntpeters/vim-better-whitespace'
-    use 'preservim/nerdtree'
+	-- UI
+	use("morhetz/gruvbox")
+	use("vim-airline/vim-airline")
+	use("vim-airline/vim-airline-themes")
+	use("ntpeters/vim-better-whitespace")
+	use("preservim/nerdtree")
 
 	-- Completion
-	use 'neovim/nvim-lspconfig'
-	use 'hrsh7th/cmp-nvim-lsp'
-	use 'hrsh7th/cmp-buffer'
-	use 'hrsh7th/cmp-path'
-	use 'hrsh7th/cmp-cmdline'
-	use 'hrsh7th/nvim-cmp'
+	use("neovim/nvim-lspconfig")
+	use("hrsh7th/cmp-nvim-lsp")
+	use("hrsh7th/cmp-buffer")
+	use("hrsh7th/cmp-path")
+	use("hrsh7th/cmp-cmdline")
+	use("hrsh7th/nvim-cmp")
+	use("mhartington/formatter.nvim") -- Formatter plugin
+	use("mfussenegger/nvim-lint") -- Linting plugin
 
-    -- Code
-    use { 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate' }
-    use { 'fatih/vim-go', run = ':GoUpdateBinaries' }
-    use 'github/copilot.vim'
+	-- Code
+	use({
+		"nvim-treesitter/nvim-treesitter",
+		run = ":TSUpdate",
+	})
+	use({ "fatih/vim-go", run = ":GoUpdateBinaries" }) -- Go
+	use({ "R-nvim/R.nvim", lazy = false, version = "~0.1.0" }) -- R
+	use({ -- Comment Support
+		"numToStr/Comment.nvim",
+		config = function()
+			require("Comment").setup()
+		end,
+	})
+	use("github/copilot.vim") -- Copilot
 
-    if packer_bootstrap then
-        require('packer').sync()
-    end
+	if packer_bootstrap then
+		require("packer").sync()
+	end
 end)
 
 -- Completion
-local cmp = require('cmp')
+local cmp = require("cmp")
 cmp.setup({
-    sources = {
-        { name = 'nvim_lsp' },
-    },
-    mapping = cmp.mapping.preset.insert({
-        ['<C-Space>'] = cmp.mapping.complete(),
-        ['<CR>'] = cmp.mapping.confirm({ select = true }),
-    }),
+	sources = {
+		{ name = "nvim_lsp" },
+	},
+	mapping = cmp.mapping.preset.insert({
+		["<C-Space>"] = cmp.mapping.complete(),
+		["<CR>"] = cmp.mapping.confirm({ select = true }),
+	}),
 })
 
--- Attach `nvim-cmp` to LSP
-local capabilities = require('cmp_nvim_lsp').default_capabilities()
-local lspconfig = require('lspconfig')
-
-local opts = { noremap = true, silent = true }
-vim.api.nvim_set_keymap('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
-vim.api.nvim_set_keymap('n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
-vim.api.nvim_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
-vim.api.nvim_set_keymap('n', '<leader>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
-
--- R Language Server setup
-lspconfig.r_language_server.setup{
-    cmd = { "R", "--slave", "-e", "languageserver::run()" },
-    filetypes = { "r", "rmd" },
-    root_dir = lspconfig.util.root_pattern(".git", "."),
-    capabilities = capabilities,
+-- Linting
+require("lint").linters_by_ft = {
+	lua = { "luacheck" }, -- Use luacheck for linting Lua files
 }
-
--- Go Language Server setup
-lspconfig.gopls.setup{
-    cmd = { "gopls" },
-    capabilities = capabilities,
-    filetypes = { "go", "gomod", "gowork", "gotmpl" },
-    root_dir = lspconfig.util.root_pattern("go.work", "go.mod", ".git"),
-    settings = {
-        gopls = {
-            analyses = {
-                unusedparams = true,
-                shadow = true,
-            },
-            staticcheck = true,
-        },
-    },
-}
-
--- Go Format on Save
-vim.api.nvim_create_autocmd("BufWritePre", {
-    pattern = "*.go",
-    callback = function()
-        vim.lsp.buf.format()
-    end,
-})
-
--- Configure OCaml LSP
-lspconfig.ocamllsp.setup{
-    cmd = { "ocamllsp" }, -- Ensure the ocaml-lsp-server binary is in your PATH
-    capabilities = capabilities,
-    filetypes = { "ocaml", "ocamlinterface", "ocamllex" },
-    root_dir = lspconfig.util.root_pattern("*.opam", ".git", "dune-project", "dune-workspace"),
-    settings = {},
-}
-
--- Ocaml Format on Save
-vim.api.nvim_create_autocmd("BufWritePre", {
-    pattern = "*.ml,*.mli",
-    callback = function()
-        vim.lsp.buf.format()
-    end,
-})
 
 -- Treesitter
-require('nvim-treesitter.configs').setup {
-    ensure_installed = { "r", "go", "ocaml"}, -- Add Languages for Treesitter
-    highlight = {
-        enable = true, -- Enable syntax highlighting
-    },
+require("nvim-treesitter.configs").setup({
+	ensure_installed = {
+		"r",
+		"go",
+		"ocaml",
+		"lua",
+		"markdown",
+		"markdown_inline",
+		"rnoweb",
+		"yaml",
+		"csv",
+	}, -- Add Languages for Treesitter
+	highlight = {
+		enable = true, -- Enable syntax highlighting
+	},
 	indent = {
 		enable = true,
 	},
-}
+})
+
+-- formatter.nvim
+require("formatter").setup({
+	filetype = {
+		lua = {
+			-- "formatter.filetypes.lua" defines default configurations for the
+			-- "lua" filetype
+			require("formatter.filetypes.lua").stylua,
+		},
+	},
+})
+
+-- Attach `nvim-cmp` to LSP
+local capabilities = require("cmp_nvim_lsp").default_capabilities()
+local lspconfig = require("lspconfig")
+
+local opts = { noremap = true, silent = true }
+vim.api.nvim_set_keymap("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", opts)
+vim.api.nvim_set_keymap("n", "K", "<cmd>lua vim.lsp.buf.hover()<CR>", opts)
+vim.api.nvim_set_keymap("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", opts)
+vim.api.nvim_set_keymap("n", "<leader>rn", "<cmd>lua vim.lsp.buf.rename()<CR>", opts)
+
+-- R Language Server setup
+lspconfig.r_language_server.setup({
+	cmd = { "R", "--slave", "-e", "languageserver::run()" },
+	filetypes = { "r", "rmd", "R" },
+	root_dir = lspconfig.util.root_pattern(".git", "."),
+	capabilities = capabilities,
+})
+
+-- Go Language Server setup
+lspconfig.gopls.setup({
+	cmd = { "gopls" },
+	capabilities = capabilities,
+	filetypes = { "go", "gomod", "gowork", "gotmpl" },
+	root_dir = lspconfig.util.root_pattern("go.work", "go.mod", ".git"),
+	settings = {
+		gopls = {
+			analyses = {
+				unusedparams = true,
+				shadow = true,
+			},
+			staticcheck = true,
+		},
+	},
+})
+
+-- Go Format on Save
+vim.api.nvim_create_autocmd("BufWritePre", {
+	pattern = "*.go",
+	callback = function()
+		vim.lsp.buf.format({ async = false })
+	end,
+})
+
+-- Configure OCaml LSP
+lspconfig.ocamllsp.setup({
+	cmd = { "ocamllsp" }, -- Ensure the ocaml-lsp-server binary is in your PATH
+	capabilities = capabilities,
+	filetypes = { "ocaml", "ocamlinterface", "ocamllex" },
+	root_dir = lspconfig.util.root_pattern("*.opam", ".git", "dune-project", "dune-workspace"),
+	settings = {},
+})
+
+-- Ocaml Format on Save
+vim.api.nvim_create_autocmd("BufWritePre", {
+	pattern = "*.ml,*.mli",
+	callback = function()
+		vim.lsp.buf.format({ async = false })
+	end,
+})
+
+-- Lua Language Server setup
+lspconfig.lua_ls.setup({
+	settings = {
+		Lua = {
+			runtime = {
+				version = "LuaJIT", -- Lua version used
+				path = vim.split(package.path, ";"),
+			},
+			diagnostics = {
+				globals = { "vim" }, -- Recognize `vim` global
+			},
+			workspace = {
+				library = vim.api.nvim_get_runtime_file("", true), -- Neovim runtime files
+			},
+			telemetry = {
+				enable = false, -- Disable telemetry
+			},
+		},
+	},
+})
+
+-- Format on save
+vim.cmd([[
+  augroup FormatAutogroup
+    autocmd!
+    autocmd BufWritePost *.lua FormatWrite
+  augroup END
+]])
+
+-- Automatically trigger linting on save
+vim.cmd([[
+  augroup Linting
+    autocmd!
+    autocmd BufWritePost *.lua lua require('lint').try_lint()
+  augroup END
+]])
 
 -- General
 vim.o.history = 500
@@ -143,8 +226,8 @@ vim.o.number = true
 vim.o.numberwidth = 1
 vim.o.relativenumber = true
 vim.g.mapleader = ","
-vim.api.nvim_set_keymap('n', '<leader>w', ':w!<CR>', { noremap = true, silent = true })
-vim.o.mouse = 'nv'
+vim.api.nvim_set_keymap("n", "<leader>w", ":w!<CR>", { noremap = true, silent = true })
+vim.o.mouse = "nv"
 
 -- VIM UX
 vim.o.scrolloff = 7
@@ -160,29 +243,29 @@ vim.o.showmatch = true
 vim.o.matchtime = 2
 
 -- Nerdtree
-vim.api.nvim_set_keymap('n', '<leader>n', ':NERDTreeFocus<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<C-n>', ':NERDTreeToggle<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<C-f>', ':NERDTreeFind<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "<leader>n", ":NERDTreeFocus<CR>", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "<C-n>", ":NERDTreeToggle<CR>", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "<C-f>", ":NERDTreeFind<CR>", { noremap = true, silent = true })
 
 -- Colors and Fonts
 vim.o.termguicolors = true
-vim.o.background = 'dark'
-pcall(vim.cmd, 'colorscheme gruvbox')
-vim.g.airline_theme = 'base16_gruvbox_dark_hard'
-vim.o.encoding = 'utf-8'
+vim.o.background = "dark"
+pcall(vim.cmd, "colorscheme gruvbox")
+vim.g.airline_theme = "base16_gruvbox_dark_hard"
+vim.o.encoding = "utf-8"
 
 -- Tabs, Windows and Buffers
-vim.api.nvim_set_keymap('n', '<Space>', '/', { noremap = false })
-vim.api.nvim_set_keymap('n', '<C-j>', '<C-W>j', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<C-k>', '<C-W>k', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<C-h>', '<C-W>h', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<C-l>', '<C-W>l', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>l', ':bnext<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>h', ':bprevious<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<C-t>k', ':tabr<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<C-t>j', ':tabl<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<C-t>h', ':tabp<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<C-t>l', ':tabn<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "<Space>", "/", { noremap = false })
+vim.api.nvim_set_keymap("n", "<C-j>", "<C-W>j", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "<C-k>", "<C-W>k", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "<C-h>", "<C-W>h", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "<C-l>", "<C-W>l", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "<leader>l", ":bnext<CR>", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "<leader>h", ":bprevious<CR>", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "<C-t>k", ":tabr<CR>", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "<C-t>j", ":tabl<CR>", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "<C-t>h", ":tabp<CR>", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "<C-t>l", ":tabn<CR>", { noremap = true, silent = true })
 
 -- Text, Tab and Indent Related
 vim.o.autoindent = true
@@ -200,5 +283,5 @@ vim.o.backup = false
 vim.o.writebackup = false
 vim.o.swapfile = false
 vim.o.updatetime = 100
-vim.o.shortmess = vim.o.shortmess .. 'c'
-vim.o.signcolumn = 'yes'
+vim.o.shortmess = vim.o.shortmess .. "c"
+vim.o.signcolumn = "yes"
