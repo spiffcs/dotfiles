@@ -126,6 +126,8 @@ require("formatter").setup({
 			-- "lua" filetype
 			require("formatter.filetypes.lua").stylua,
 		},
+		-- Opt-in to default formatter for R files
+		r = require("formatter.filetypes.r").styler,
 	},
 })
 
@@ -157,7 +159,6 @@ vim.diagnostic.config({
 		max_width = 80, -- Limit the width of the diagnostic float
 		max_height = 20, -- Limit the height of the diagnostic float
 	},
-	debounce = 150, -- Adjust debounce time to prevent rapid diagnostics
 })
 
 vim.api.nvim_create_autocmd("FileType", {
@@ -181,6 +182,14 @@ lspconfig.r_language_server.setup({
 	filetypes = { "r", "rmd", "R" },
 	root_dir = lspconfig.util.root_pattern(".git", "."),
 	capabilities = capabilities,
+})
+
+local augroup = vim.api.nvim_create_augroup
+local autocmd = vim.api.nvim_create_autocmd
+augroup("__formatter__", { clear = true })
+autocmd("BufWritePost", {
+	group = "__formatter__",
+	command = ":FormatWrite",
 })
 
 -- Go Language Server setup
@@ -245,22 +254,6 @@ lspconfig.lua_ls.setup({
 		},
 	},
 })
-
--- Format on save
-vim.cmd([[
-  augroup FormatAutogroup
-    autocmd!
-    autocmd BufWritePost *.lua FormatWrite
-  augroup END
-]])
-
--- Automatically trigger linting on save
-vim.cmd([[
-  augroup Linting
-    autocmd!
-    autocmd BufWritePost *.lua lua require('lint').try_lint()
-  augroup END
-]])
 
 -- General
 vim.o.history = 500
