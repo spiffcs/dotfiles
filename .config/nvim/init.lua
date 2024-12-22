@@ -92,6 +92,7 @@ require("lint").linters_by_ft = {
 
 -- Treesitter
 require("nvim-treesitter.configs").setup({
+	-- Add Languages for Treesitter
 	ensure_installed = {
 		"r",
 		"go",
@@ -102,7 +103,7 @@ require("nvim-treesitter.configs").setup({
 		"rnoweb",
 		"yaml",
 		"csv",
-	}, -- Add Languages for Treesitter
+	},
 	highlight = {
 		enable = true, -- Enable syntax highlighting
 	},
@@ -131,6 +132,41 @@ vim.api.nvim_set_keymap("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", opts
 vim.api.nvim_set_keymap("n", "K", "<cmd>lua vim.lsp.buf.hover()<CR>", opts)
 vim.api.nvim_set_keymap("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", opts)
 vim.api.nvim_set_keymap("n", "<leader>rn", "<cmd>lua vim.lsp.buf.rename()<CR>", opts)
+
+-- Diagnostic config
+vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float, { noremap = true, silent = true })
+vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { noremap = true, silent = true }) -- Previous diagnostic
+vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { noremap = true, silent = true }) -- Next diagnostic
+
+vim.diagnostic.config({
+	virtual_text = false, -- Disable inline virtual text (optional, reduces clutter)
+	signs = true, -- Show signs in the gutter
+	underline = true, -- Underline the problematic code
+	update_in_insert = false, -- Update diagnostics only in normal mode
+	severity_sort = true, -- Sort diagnostics by severity
+	float = {
+		border = "rounded", -- Rounded border for better aesthetics
+		focusable = false, -- Prevent focusing the diagnostic window
+		source = true, -- Show the diagnostic source (e.g., "lua-language-server")
+		max_width = 80, -- Limit the width of the diagnostic float
+		max_height = 20, -- Limit the height of the diagnostic float
+	},
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = "lspinfo,lsp-hover", -- Apply wrapping for LSP hover and diagnostic messages
+	callback = function()
+		vim.opt_local.wrap = true
+		vim.opt_local.linebreak = true
+	end,
+})
+
+-- Open diagnostics on cursor hold
+vim.api.nvim_create_autocmd("CursorHold", {
+	callback = function()
+		vim.diagnostic.open_float(nil, { focusable = false })
+	end,
+})
 
 -- R Language Server setup
 lspconfig.r_language_server.setup({
@@ -250,7 +286,7 @@ vim.api.nvim_set_keymap("n", "<C-f>", ":NERDTreeFind<CR>", { noremap = true, sil
 -- Colors and Fonts
 vim.o.termguicolors = true
 vim.o.background = "dark"
-pcall(vim.cmd, "colorscheme gruvbox")
+vim.cmd("colorscheme gruvbox")
 vim.g.airline_theme = "base16_gruvbox_dark_hard"
 vim.o.encoding = "utf-8"
 
@@ -267,15 +303,45 @@ vim.api.nvim_set_keymap("n", "<C-t>j", ":tabl<CR>", { noremap = true, silent = t
 vim.api.nvim_set_keymap("n", "<C-t>h", ":tabp<CR>", { noremap = true, silent = true })
 vim.api.nvim_set_keymap("n", "<C-t>l", ":tabn<CR>", { noremap = true, silent = true })
 
--- Text, Tab and Indent Related
-vim.o.autoindent = true
-vim.o.expandtab = false
-vim.o.tabstop = 4
-vim.o.shiftwidth = 4
-vim.o.linebreak = true
-vim.o.textwidth = 500
-vim.o.smartindent = true
-vim.o.wrap = true
+-- Text, Tab and Indent
+-- Create an autocommand group for clean configuration
+vim.cmd([[
+  augroup FileTypeSpecific
+    autocmd!
+  augroup END
+]])
+
+-- Helper function to set tab/spaces configuration
+local function set_indentation(ft, tabsize, use_spaces)
+	local expandtab = use_spaces and "setlocal expandtab" or "setlocal noexpandtab"
+	vim.cmd(string.format(
+		[[
+    autocmd FileType %s setlocal tabstop=%d shiftwidth=%d | %s
+  ]],
+		ft,
+		tabsize,
+		tabsize,
+		expandtab
+	))
+end
+
+-- Filetype-specific configurations
+set_indentation("lua", 2, true) -- Lua: 2 spaces, uses spaces
+set_indentation("python", 4, true) -- Python: 4 spaces, uses spaces
+set_indentation("make", 4, false) -- Makefiles: 4 spaces, uses tabs
+set_indentation("go", 4, false) -- Go: 4 spaces, uses tabs
+set_indentation("html", 2, true) -- HTML: 2 spaces, uses spaces
+set_indentation("javascript", 2, true) -- JavaScript: 2 spaces, uses spaces
+set_indentation("r", 2, true) -- R: 2 spaces, uses spaces
+
+-- vim.o.autoindent = true
+-- vim.o.expandtab = false
+-- vim.o.tabstop = 4
+-- vim.o.shiftwidth = 4
+-- vim.o.linebreak = true
+-- vim.o.textwidth = 500
+-- vim.o.smartindent = true
+-- vim.o.wrap = true
 
 -- Misc
 vim.o.hidden = true
