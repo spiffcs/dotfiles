@@ -92,6 +92,12 @@ require("lint").linters_by_ft = {
 
 -- Treesitter
 require("nvim-treesitter.configs").setup({
+	syntax = {
+		enable = true,
+		additional_vim_regex_highlighting = false,
+	},
+	sync_install = true,
+	auto_install = true,
 	-- Add Languages for Treesitter
 	ensure_installed = {
 		"r",
@@ -151,6 +157,7 @@ vim.diagnostic.config({
 		max_width = 80, -- Limit the width of the diagnostic float
 		max_height = 20, -- Limit the height of the diagnostic float
 	},
+	debounce = 150, -- Adjust debounce time to prevent rapid diagnostics
 })
 
 vim.api.nvim_create_autocmd("FileType", {
