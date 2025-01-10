@@ -132,10 +132,28 @@ local cmp = require("cmp")
 cmp.setup({
 	sources = {
 		{ name = "nvim_lsp" },
+		{ name = "buffer" }, -- Buffer completion source
+		{ name = "path" }, -- Path completion source
 	},
 	mapping = cmp.mapping.preset.insert({
 		["<C-Space>"] = cmp.mapping.complete(),
 		["<CR>"] = cmp.mapping.confirm({ select = true }),
+		-- Bind Tab to cycle forward through completions
+		["<Tab>"] = cmp.mapping(function(fallback)
+			if cmp.visible() then
+				cmp.select_next_item() -- Select next completion item
+			else
+				fallback() -- Fallback to default Tab behavior (e.g., indentation)
+			end
+		end, { "i", "s" }),
+		-- Bind Shift-Tab to cycle backward through completions
+		["<S-Tab>"] = cmp.mapping(function(fallback)
+			if cmp.visible() then
+				cmp.select_prev_item() -- Select previous completion item
+			else
+				fallback() -- Fallback to default Shift-Tab behavior (e.g., previous item in insert mode)
+			end
+		end, { "i", "s" }),
 	}),
 })
 
@@ -369,6 +387,13 @@ vim.api.nvim_set_keymap("n", "<leader>r", ":FZF<CR>", opts)
 vim.api.nvim_set_keymap("n", "<leader>n", ":NERDTreeFocus<CR>", opts)
 vim.api.nvim_set_keymap("n", "<C-n>", ":NERDTreeToggle<CR>", opts)
 vim.api.nvim_set_keymap("n", "<C-f>", ":NERDTreeFind<CR>", opts)
+
+-- Copilot configuration
+vim.g.copilot_no_tab_map = true -- Disable default Tab mapping for Copilot
+-- Keymap for triggering Copilot completion
+vim.api.nvim_set_keymap("i", "<leader>c", "copilot#Next()", { noremap = true, silent = true, expr = true })
+-- To accept Copilot suggestions, we can use the Enter key, or you can map it to something else
+vim.api.nvim_set_keymap("i", "<leader>a", "copilot#Accept()", { noremap = true, silent = true, expr = true })
 
 -- LSP goto, docs, references, rename
 vim.api.nvim_set_keymap("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", opts)
