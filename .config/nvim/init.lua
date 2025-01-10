@@ -335,8 +335,15 @@ vim.cmd([[
 -- Helper function to set tab/spaces configuration
 local function set_indentation(ft, tabsize, use_spaces)
 	local expandtab = use_spaces and "setlocal expandtab" or "setlocal noexpandtab"
-	local format_string = "[[autocmd FileType %s setlocal tabstop=%d shiftwidth=%d | %s]]"
-	vim.cmd(string.format(format_string, ft, tabsize, tabsize, expandtab))
+	vim.cmd(string.format(
+		[[
+    autocmd FileType %s setlocal tabstop=%d shiftwidth=%d | %s
+  ]],
+		ft,
+		tabsize,
+		tabsize,
+		expandtab
+	))
 end
 
 -- Filetype-specific configurations
