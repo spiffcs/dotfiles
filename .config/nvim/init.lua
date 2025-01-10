@@ -9,7 +9,6 @@
 --    -> Tabs, Windows and Buffers
 --    -> Text, tab and indent related
 --    -> Misc
---    -> Telescope
 
 -- Plugins
 local ensure_packer = function()
@@ -302,6 +301,7 @@ vim.api.nvim_set_keymap("n", "<C-t>k", ":tabr<CR>", { noremap = true, silent = t
 vim.api.nvim_set_keymap("n", "<C-t>j", ":tabl<CR>", { noremap = true, silent = true })
 vim.api.nvim_set_keymap("n", "<C-t>h", ":tabp<CR>", { noremap = true, silent = true })
 vim.api.nvim_set_keymap("n", "<C-t>l", ":tabn<CR>", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "<leader><CR>", ":nohlsearch<CR>", { noremap = true, silent = true })
 
 -- Text, Tab and Indent
 -- Create an autocommand group for clean configuration
