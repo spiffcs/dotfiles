@@ -52,6 +52,9 @@ require("packer").startup(function(use)
 	use("mhartington/formatter.nvim") -- Formatter plugin
 	use("mfussenegger/nvim-lint") -- Linting plugin
 
+	-- Search
+	use("junegunn/fzf")
+
 	-- Code
 	use({
 		"nvim-treesitter/nvim-treesitter",
@@ -262,6 +265,7 @@ vim.o.numberwidth = 1
 vim.o.relativenumber = true
 vim.g.mapleader = ","
 vim.api.nvim_set_keymap("n", "<leader>w", ":w!<CR>", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "<leader>r", ":FZF<CR>", { noremap = true, silent = true })
 vim.o.mouse = "nv"
 
 -- VIM UX
