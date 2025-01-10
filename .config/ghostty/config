@@ -3,6 +3,5 @@ theme = GruvboxDarkHard
 cursor-style = underline
 mouse-hide-while-typing = true
 mouse-scroll-multiplier = 2
-macos-titlebar-style = hidden
 window-padding-balance = true
 background = 1c2021
