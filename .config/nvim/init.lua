@@ -65,6 +65,7 @@ require("packer").startup(function(use)
 	-- Language-specific
 	use({ "fatih/vim-go", run = ":GoUpdateBinaries" }) -- Go
 	use({ "R-nvim/R.nvim", lazy = false, version = "~0.1.0" }) -- R
+	use("rhysd/committia.vim") -- git commit highlighter
 
 	-- Code Navigation and Comments
 	use("junegunn/fzf")

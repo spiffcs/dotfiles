@@ -4,9 +4,6 @@
 
 This is my personal Neovim configuration. It's designed for a smooth development experience across various programming languages and tools. It includes settings for general usability, language server protocol (LSP) integration, syntax highlighting, code completion, formatting, and various plugins. The following is not yet covered in this readme: `.config/ghostty` and `.config/fish` files.
 
-## Maintainer
-- **Christopher Phillips** - [@spiffcs](https://twitter.com/spiffcs)
-
 ## Features
 
 - **Plugin Management**: Managed with [Packer.nvim](https://github.com/wbthomason/packer.nvim).
