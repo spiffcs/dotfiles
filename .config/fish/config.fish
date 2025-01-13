@@ -9,6 +9,7 @@ alias hfc="huggingface-cli"
 set PATH /usr/local/bin /usr/sbin $PATH
 set PATH /Users/hal/go/bin $PATH
 set PATH /opt/homebrew/bin $PATH
+set PATH ~/.local/bin $PATH
 
 # Set up fzf key bindings
 fzf --fish | source

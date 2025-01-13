@@ -2,7 +2,10 @@
 
 ## Neovim Configuration (.config/nvim/init.lua)
 
-This is my personal Neovim configuration. It's designed for a smooth development experience across various programming languages and tools. It includes settings for general usability, language server protocol (LSP) integration, syntax highlighting, code completion, formatting, and various plugins. The following is not yet covered in this readme: `.config/ghostty` and `.config/fish` files.
+This is my personal Neovim configuration. It's designed for a smooth development experience across various programming languages and tools. It includes settings for general usability, language server protocol (LSP) integration, syntax highlighting, code completion, formatting, and various plugins.
+
+#### Fish && Ghostty
+The following configurations are not yet covered in this readme: `.config/ghostty` and `.config/fish` files.
 
 ## Features
 
@@ -35,22 +38,21 @@ This configuration includes the following categories of plugins:
     - `vim-airline`: A status line plugin for Neovim.
     - `vim-airline-themes`: Themes for vim-airline.
     - `ntpeters/vim-better-whitespace`: Highlights trailing whitespace.
-  
+
 - **Completion**:
     - `nvim-lspconfig`: LSP (Language Server Protocol) configurations.
     - `nvim-cmp`: Autocompletion framework.
     - `cmp-nvim-lsp`, `cmp-buffer`, `cmp-path`, `cmp-cmdline`: Various completion sources for LSP, buffers, paths, and command-line.
-  
+
 - **Search**:
     - `fzf`: A command-line fuzzy finder.
-  
+
 - **Code**:
     - `nvim-treesitter`: Syntax highlighting and more.
     - `vim-go`: Go programming support.
     - `R.nvim`: R programming support.
     - `Comment.nvim`: Toggle comments.
-    - `copilot.vim`: GitHub Copilot support.
-  
+
 - **Formatting & Linting**:
     - `formatter.nvim`: Code formatter for various languages.
     - `nvim-lint`: Linting support for different file types.
@@ -60,7 +62,9 @@ This configuration includes the following categories of plugins:
     - `lua_ls`: LSP Managed Separate
     - `gopls`: LSP Managed Separate (vim-go might do this now?)
     - `r_language_server`: LSP Managed Separate
-    - Code Formatters Managed Separate
+    - `pyrite`: LSP Managed Separate
+    - `ruff`: LSP Managed Separate
+    - Code Formatters Managed Separate, but configuration done through [conform](https://github.com/stevearc/conform.nvim)
 
 
 ### LSP Configuration
@@ -68,6 +72,7 @@ This configuration includes the following categories of plugins:
 The configuration supports LSP for multiple programming languages. Here's a quick rundown:
 
 - **Go**: `gopls` LSP setup with formatting on save.
+- **Python**: `pyrite` and `ruff` for python language support.
 - **R**: `r_language_server` LSP for R
 - **Lua**: Using `lua_ls` for Lua LSP, with custom configurations for Neovim.
 - **OCaml**: `ocamllsp` for OCaml language support.
@@ -85,10 +90,6 @@ Key mappings for autocompletion:
 - `<C-Space>`: Trigger autocompletion.
 - `<CR>`: Confirm autocompletion.
 - `<TAB>` && `<S-TAB>`: cycle auto completion.
-
-Key mappings for copilot:
-- `<leader>c`: trigger Copilot completion
-- `<leader>a`: accept Copilot completion
 
 ### Formatting & Linting
 
@@ -115,13 +116,13 @@ Several custom key mappings have been set up for quick access to various feature
     - `<leader>n`: Open NERDTree.
     - `<C-n>`: Toggle NERDTree.
     - `<C-f>`: Focus NERDTree on the current file.
-  
+
 - **LSP**:
     - `gd`: Go to definition.
     - `K`: Show hover info.
     - `gr`: Go to references.
     - `<leader>rn`: Rename symbol.
-  
+
 - **Diagnostic**:
     - `<leader>d`: Open diagnostic floating window.
     - `[d` and `]d`: Navigate to previous and next diagnostic.
@@ -133,7 +134,7 @@ Several custom key mappings have been set up for quick access to various feature
 ### Visual Enhancements
 - **Colors**: Uses `gruvbox` as the primary color scheme with `vim-airline` for the status line.
 - **Fonts**: The setup assumes you're using a terminal with support for true color (e.g., `termguicolors` enabled).
-  
+
 ### General Settings
 - **History**: `500` lines of command history.
 - **Autoread**: Automatically read files when modified outside of Neovim.

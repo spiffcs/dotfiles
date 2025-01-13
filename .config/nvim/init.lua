@@ -59,7 +59,7 @@ require("packer").startup(function(use)
 	})
 
 	-- Formatting and Linting
-	use("mhartington/formatter.nvim")
+	use("stevearc/conform.nvim")
 	use("mfussenegger/nvim-lint")
 
 	-- Language-specific
@@ -75,7 +75,6 @@ require("packer").startup(function(use)
 			require("Comment").setup()
 		end,
 	})
-	use("github/copilot.vim") -- Copilot
 
 	if packer_bootstrap then
 		require("packer").sync()
@@ -241,6 +240,66 @@ lspconfig.gopls.setup({
 	},
 })
 
+-- Python Pyright Langauge Server
+lspconfig.pyright.setup({
+	settings = {
+		pyright = {
+			-- Using Ruff's import organizer
+			disableOrganizeImports = true,
+		},
+		python = {
+			analysis = {
+				-- Ignore all files for analysis to exclusively use Ruff for linting
+				ignore = { "*" },
+			},
+		},
+	},
+})
+
+-- Python Ruff-lsp
+lspconfig.ruff.setup({
+	-- define commands for BufWritePost
+	commands = {
+		RuffAutofix = {
+			function()
+				vim.lsp.buf.execute_command({
+					command = "ruff.applyAutofix",
+					arguments = {
+						{ uri = vim.uri_from_bufnr(0) },
+					},
+				})
+			end,
+			description = "Ruff: Fix all auto-fixable problems",
+		},
+		RuffOrganizeImports = {
+			function()
+				vim.lsp.buf.execute_command({
+					command = "ruff.applyOrganizeImports",
+					arguments = {
+						{ uri = vim.uri_from_bufnr(0) },
+					},
+				})
+			end,
+			description = "Ruff: Format imports",
+		},
+	},
+})
+
+vim.api.nvim_create_autocmd("LspAttach", {
+	group = vim.api.nvim_create_augroup("lsp_attach_disable_ruff_hover", { clear = true }),
+	callback = function(args)
+		local client = vim.lsp.get_client_by_id(args.data.client_id)
+		if client == nil then
+			return
+		end
+		if client.name == "ruff" then
+			-- Disable hover in favor of Pyright
+			client.server_capabilities.hoverProvider = false
+		end
+	end,
+	desc = "LSP: Disable hover capability from Ruff",
+})
+
 -- R Language Server
 lspconfig.r_language_server.setup({
 	cmd = { "R", "--slave", "-e", "languageserver::run()" },
@@ -278,6 +337,7 @@ require("nvim-treesitter.configs").setup({
 	-- Add Languages for Treesitter
 	ensure_installed = {
 		"r",
+		"python",
 		"go",
 		"ocaml",
 		"lua",
@@ -296,54 +356,28 @@ require("nvim-treesitter.configs").setup({
 })
 
 -- Formatter setup
-require("formatter").setup({
-	filetype = {
-		lua = {
-			-- "formatter.filetypes.lua" defines default "lua" filetype
-			require("formatter.filetypes.lua").stylua,
-		},
+require("conform").setup({
+	formatters_by_ft = {
+		lua = { "stylua" },
+		go = { "gofmt", "goimports" },
+		python = { "ruff_fix", "ruff_format", "ruff_organize_imports" },
 		-- Opt-in to default formatter for R files
-		r = require("formatter.filetypes.r").styler,
-		-- TODO: incorporate python, ocaml, etc
+		r = { "styler" },
 		-- Go, Rust toolchains already do this
 	},
 })
 
 -- Auto group for format on write
-local augroup = vim.api.nvim_create_augroup
-local autocmd = vim.api.nvim_create_autocmd
-augroup("__formatter__", { clear = true })
-autocmd("BufWritePost", {
-	group = "__formatter__",
-	command = ":FormatWrite",
-})
-
--- Go Format on Save
 vim.api.nvim_create_autocmd("BufWritePre", {
-	pattern = "*.go",
-	callback = function()
-		vim.lsp.buf.format({ async = false })
+	pattern = "*",
+	callback = function(args)
+		require("conform").format({ bufnr = args.buf })
 	end,
-})
-
--- Ocaml Format on Save
-vim.api.nvim_create_autocmd("BufWritePre", {
-	pattern = "*.ml,*.mli",
-	callback = function()
-		vim.lsp.buf.format({ async = false })
-	end,
-})
-
--- Lua Format on Save
-vim.api.nvim_create_autocmd("BufWritePre", {
-	pattern = "*.lua",
-	command = "FormatWrite",
 })
 
 -- -------------------------
 -- Filetype-Specific Setting
 -- -------------------------
-
 -- Create an autocommand group for clean configuration
 vim.cmd([[
   augroup FileTypeSpecific
@@ -388,13 +422,6 @@ vim.api.nvim_set_keymap("n", "<leader>r", ":FZF<CR>", opts)
 vim.api.nvim_set_keymap("n", "<leader>n", ":NERDTreeFocus<CR>", opts)
 vim.api.nvim_set_keymap("n", "<C-n>", ":NERDTreeToggle<CR>", opts)
 vim.api.nvim_set_keymap("n", "<C-f>", ":NERDTreeFind<CR>", opts)
-
--- Copilot configuration
-vim.g.copilot_no_tab_map = true -- Disable default Tab mapping for Copilot
--- Keymap for triggering Copilot completion
-vim.api.nvim_set_keymap("i", "<leader>c", "copilot#Next()", { noremap = true, silent = true, expr = true })
--- To accept Copilot suggestions, we can use the Enter key, or you can map it to something else
-vim.api.nvim_set_keymap("i", "<leader>a", "copilot#Accept()", { noremap = true, silent = true, expr = true })
 
 -- LSP goto, docs, references, rename
 vim.api.nvim_set_keymap("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", opts)
