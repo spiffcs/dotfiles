@@ -422,6 +422,7 @@ vim.api.nvim_set_keymap("n", "<leader>r", ":FZF<CR>", opts)
 vim.api.nvim_set_keymap("n", "<leader>n", ":NERDTreeFocus<CR>", opts)
 vim.api.nvim_set_keymap("n", "<C-n>", ":NERDTreeToggle<CR>", opts)
 vim.api.nvim_set_keymap("n", "<C-f>", ":NERDTreeFind<CR>", opts)
+vim.g.NERDTreeShowHidden = 1
 
 -- LSP goto, docs, references, rename
 vim.api.nvim_set_keymap("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", opts)
