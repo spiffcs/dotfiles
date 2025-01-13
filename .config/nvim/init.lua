@@ -256,7 +256,7 @@ lspconfig.pyright.setup({
 	},
 })
 
--- Python Ruff-lsp
+-- Python Ruff Language Server
 lspconfig.ruff.setup({
 	-- define commands for BufWritePost
 	commands = {
@@ -285,6 +285,7 @@ lspconfig.ruff.setup({
 	},
 })
 
+-- diable ruff in favor of Pyright
 vim.api.nvim_create_autocmd("LspAttach", {
 	group = vim.api.nvim_create_augroup("lsp_attach_disable_ruff_hover", { clear = true }),
 	callback = function(args)
@@ -328,6 +329,8 @@ require("lint").linters_by_ft = {
 
 -- Treesitter setup
 require("nvim-treesitter.configs").setup({
+	modules = {},
+	ignore_install = {},
 	syntax = {
 		enable = true,
 		additional_vim_regex_highlighting = false,
@@ -336,11 +339,14 @@ require("nvim-treesitter.configs").setup({
 	auto_install = true,
 	-- Add Languages for Treesitter
 	ensure_installed = {
+		"c",
+		"lua",
+		"vim",
+		"vimdoc",
 		"r",
 		"python",
 		"go",
 		"ocaml",
-		"lua",
 		"markdown",
 		"markdown_inline",
 		"rnoweb",
