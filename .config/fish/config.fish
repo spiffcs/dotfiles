@@ -7,9 +7,10 @@ alias hfc="huggingface-cli"
 
 # add additional path for installed software
 set PATH /usr/local/bin /usr/sbin $PATH
-set PATH /Users/hal/go/bin $PATH
 set PATH /opt/homebrew/bin $PATH
+set PATH ~/go/bin $PATH
 set PATH ~/.local/bin $PATH
+set PATH ~/.opam/default/bin $PATH
 
 # Set up fzf key bindings
 fzf --fish | source

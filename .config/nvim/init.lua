@@ -8,7 +8,7 @@
 --    -> Formatting, Linting, and Treesitter
 --    -> Filetype-Specific Settings
 --    -> Keybindings
---    -> UI and Appearance
+--    -> Lua Script Imports
 
 -- -------------------------
 -- Plugins
@@ -61,6 +61,18 @@ require("packer").startup(function(use)
 	-- Formatting and Linting
 	use("stevearc/conform.nvim")
 	use("mfussenegger/nvim-lint")
+
+	-- Debugger
+	use({
+		"mfussenegger/nvim-dap",
+		requires = {
+			"rcarriga/nvim-dap-ui", -- UI for nvim-dap
+			"theHamsta/nvim-dap-virtual-text", --Virtual text for nvim-dap
+			"nvim-neotest/nvim-nio", --Async IO neovim
+		},
+	})
+
+	use("leoluz/nvim-dap-go")
 
 	-- Language-specific
 	use({ "fatih/vim-go", run = ":GoUpdateBinaries" }) -- Go
@@ -463,3 +475,9 @@ vim.api.nvim_set_keymap("n", "<C-t>j", ":tabl<CR>", { noremap = true, silent = t
 vim.api.nvim_set_keymap("n", "<C-t>h", ":tabp<CR>", { noremap = true, silent = true })
 vim.api.nvim_set_keymap("n", "<C-t>l", ":tabn<CR>", { noremap = true, silent = true })
 vim.api.nvim_set_keymap("n", "<leader><CR>", ":nohlsearch<CR>", { noremap = true, silent = true })
+
+-- -------------------------
+-- Lua Script Imports
+-- -------------------------
+require("dap-config")
+require("goautoimport")
