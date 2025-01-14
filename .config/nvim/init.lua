@@ -81,6 +81,7 @@ require("packer").startup(function(use)
 
 	-- Code Navigation and Comments
 	use("junegunn/fzf")
+	use({ "nvim-telescope/telescope.nvim", requires = { "nvim-lua/plenary.nvim" } }) -- ui for rg
 	use({ -- Comment Support
 		"numToStr/Comment.nvim",
 		config = function()
@@ -462,6 +463,9 @@ vim.api.nvim_set_keymap("n", "K", "<cmd>lua vim.lsp.buf.hover()<CR>", opts)
 vim.api.nvim_set_keymap("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", opts)
 vim.api.nvim_set_keymap("n", "<leader>rn", "<cmd>lua vim.lsp.buf.rename()<CR>", opts)
 
+-- File Search with ripgrep
+vim.api.nvim_set_keymap("n", "<leader>fw", "<cmd>Telescope live_grep<CR>", { noremap = true, silent = true })
+
 -- Tabs, Windows and Buffers
 vim.api.nvim_set_keymap("n", "<Space>", "/", { noremap = false })
 vim.api.nvim_set_keymap("n", "<C-j>", "<C-W>j", { noremap = true, silent = true })
@@ -481,3 +485,4 @@ vim.api.nvim_set_keymap("n", "<leader><CR>", ":nohlsearch<CR>", { noremap = true
 -- -------------------------
 require("dap-config")
 require("goautoimport")
+require("tele-rg")
