@@ -464,21 +464,22 @@ vim.api.nvim_set_keymap("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", opts
 vim.api.nvim_set_keymap("n", "<leader>rn", "<cmd>lua vim.lsp.buf.rename()<CR>", opts)
 
 -- File Search with ripgrep
-vim.api.nvim_set_keymap("n", "<leader>fw", "<cmd>Telescope live_grep<CR>", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "<leader>fw", "<cmd>Telescope live_grep<CR>", opts)
 
 -- Tabs, Windows and Buffers
 vim.api.nvim_set_keymap("n", "<Space>", "/", { noremap = false })
-vim.api.nvim_set_keymap("n", "<C-j>", "<C-W>j", { noremap = true, silent = true })
-vim.api.nvim_set_keymap("n", "<C-k>", "<C-W>k", { noremap = true, silent = true })
-vim.api.nvim_set_keymap("n", "<C-h>", "<C-W>h", { noremap = true, silent = true })
-vim.api.nvim_set_keymap("n", "<C-l>", "<C-W>l", { noremap = true, silent = true })
-vim.api.nvim_set_keymap("n", "<leader>l", ":bnext<CR>", { noremap = true, silent = true })
-vim.api.nvim_set_keymap("n", "<leader>h", ":bprevious<CR>", { noremap = true, silent = true })
-vim.api.nvim_set_keymap("n", "<C-t>k", ":tabr<CR>", { noremap = true, silent = true })
-vim.api.nvim_set_keymap("n", "<C-t>j", ":tabl<CR>", { noremap = true, silent = true })
-vim.api.nvim_set_keymap("n", "<C-t>h", ":tabp<CR>", { noremap = true, silent = true })
-vim.api.nvim_set_keymap("n", "<C-t>l", ":tabn<CR>", { noremap = true, silent = true })
-vim.api.nvim_set_keymap("n", "<leader><CR>", ":nohlsearch<CR>", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "<C-j>", "<C-W>j", opts)
+vim.api.nvim_set_keymap("n", "<C-k>", "<C-W>k", opts)
+vim.api.nvim_set_keymap("n", "<C-h>", "<C-W>h", opts)
+vim.api.nvim_set_keymap("n", "<C-l>", "<C-W>l", opts)
+vim.api.nvim_set_keymap("n", "<leader>=", "<C-w>=", opts)
+vim.api.nvim_set_keymap("n", "<leader>l", ":bnext<CR>", opts)
+vim.api.nvim_set_keymap("n", "<leader>h", ":bprevious<CR>", opts)
+vim.api.nvim_set_keymap("n", "<C-t>k", ":tabr<CR>", opts)
+vim.api.nvim_set_keymap("n", "<C-t>j", ":tabl<CR>", opts)
+vim.api.nvim_set_keymap("n", "<C-t>h", ":tabp<CR>", opts)
+vim.api.nvim_set_keymap("n", "<C-t>l", ":tabn<CR>", opts)
+vim.api.nvim_set_keymap("n", "<leader><CR>", ":nohlsearch<CR>", opts)
 
 -- -------------------------
 -- Lua Script Imports
