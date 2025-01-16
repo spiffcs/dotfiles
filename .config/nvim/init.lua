@@ -45,6 +45,7 @@ require("packer").startup(function(use)
 	use("vim-airline/vim-airline-themes")
 	use("ntpeters/vim-better-whitespace")
 	use("preservim/nerdtree")
+	use("ellisonleao/glow.nvim")
 
 	-- Completion and LSP
 	use("neovim/nvim-lspconfig")
@@ -484,6 +485,7 @@ vim.api.nvim_set_keymap("n", "<leader><CR>", ":nohlsearch<CR>", opts)
 -- -------------------------
 -- Lua Script Imports
 -- -------------------------
+require("glow").setup()
 require("dap-config")
 require("goautoimport")
 require("tele-rg")
