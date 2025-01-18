@@ -83,6 +83,7 @@ require("packer").startup(function(use)
 	-- Code Navigation and Comments
 	use("junegunn/fzf")
 	use({ "nvim-telescope/telescope.nvim", requires = { "nvim-lua/plenary.nvim" } }) -- ui for rg
+	use({ "folke/todo-comments.nvim", dependences = { "nvim-lua/plenary.nvim" }, opts = {} }) -- TODO, HACK, NOTE, PERF, FIX, WARNING highlights & search
 	use({ -- Comment Support
 		"numToStr/Comment.nvim",
 		config = function()
@@ -486,6 +487,7 @@ vim.api.nvim_set_keymap("n", "<leader><CR>", ":nohlsearch<CR>", opts)
 -- Lua Script Imports
 -- -------------------------
 require("glow").setup()
+require("todo-comments").setup()
 require("dap-config")
 require("goautoimport")
 require("tele-rg")
