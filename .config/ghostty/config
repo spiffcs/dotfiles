@@ -5,3 +5,4 @@ mouse-hide-while-typing = true
 mouse-scroll-multiplier = 2
 window-padding-balance = true
 background = 1c2021
+unfocused-split-opacity = 0.10
