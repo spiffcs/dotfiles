@@ -1,142 +1,179 @@
 # .dotfiles
 
-## Neovim Configuration (.config/nvim/init.lua)
+Personal configuration files.
 
-This is my personal Neovim configuration. It's designed for a smooth development experience across various programming languages and tools. It includes settings for general usability, language server protocol (LSP) integration, syntax highlighting, code completion, formatting, and various plugins.
+## What's Included
 
-#### Fish && Ghostty
-The following configurations are not yet covered in this readme: `.config/ghostty` and `.config/fish` files.
+| Tool | Description |
+|------|-------------|
+| **Neovim** | IDE-like editor with LSP, completion, Treesitter |
+| **Fish** | Shell with vi bindings, pyenv, fzf integration |
+| **Ghostty** | GPU-accelerated terminal with Gruvbox theme |
+| **Git** | Aliases, commit signing, color configuration |
 
-## Features
+## Quick Start
 
-- **Plugin Management**: Managed with [Packer.nvim](https://github.com/wbthomason/packer.nvim).
-- **UI Enhancements**: Custom colorscheme, UI plugins like `vim-airline`, `NERDTree`.
-- **LSP & Autocompletion**: LSP configuration for Go, R, Lua, Python, and other languages with nvim-cmp for autocompletion.
-- **Code Formatting & Linting**: Integration with `formatter.nvim` and `nvim-lint` for automatic code formatting and linting.
-- **Syntax Highlighting**: Powered by [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) for robust syntax highlighting.
-- **File Navigation**: `NERDTree` for file exploration and `fzf` for fuzzy searching.
+```bash
+git clone https://github.com/spiffcs/dotfiles.git ~/dotfiles
+cd ~/dotfiles
+./install.sh --all
+```
 
-## Setup
+## Prerequisites
 
-### Prerequisites
+- **macOS** (tested on Sonoma)
+- **Homebrew** - [Install Homebrew](https://brew.sh)
 
-- **Neovim 0.5+**: Ensure you are using Neovim version 0.5 or later.
-- **Git**: Required for plugin management via Packer.
+## Installation
 
-### Install Packer
+### Interactive Mode
 
-This setup uses [Packer.nvim](https://github.com/wbthomason/packer.nvim) for managing plugins. If you don't have Packer installed, the configuration will handle the installation automatically.
+```bash
+./install.sh
+```
 
-## Key Features Breakdown
+Presents a menu to choose what to install.
 
-### Plugins
+### Command Line Options
 
-This configuration includes the following categories of plugins:
+```bash
+./install.sh --all       # Install everything (deps + symlinks)
+./install.sh --deps      # Install Homebrew packages only
+./install.sh --symlink   # Create symlinks only
+./install.sh --dry-run   # Preview changes without applying
+```
 
-- **UI**:
-    - `gruvbox`: A popular colorscheme.
-    - `vim-airline`: A status line plugin for Neovim.
-    - `vim-airline-themes`: Themes for vim-airline.
-    - `ntpeters/vim-better-whitespace`: Highlights trailing whitespace.
+### Using Make
 
-- **Completion**:
-    - `nvim-lspconfig`: LSP (Language Server Protocol) configurations.
-    - `nvim-cmp`: Autocompletion framework.
-    - `cmp-nvim-lsp`, `cmp-buffer`, `cmp-path`, `cmp-cmdline`: Various completion sources for LSP, buffers, paths, and command-line.
+```bash
+make all       # Install everything
+make deps      # Install Homebrew packages
+make symlink   # Create symlinks only
+make dry-run   # Preview changes
+make clean     # Remove symlinks
+```
 
-- **Search**:
-    - `fzf`: A command-line fuzzy finder.
+## Configuration Details
 
-- **Code**:
-    - `nvim-treesitter`: Syntax highlighting and more.
-    - `vim-go`: Go programming support.
-    - `R.nvim`: R programming support.
-    - `Comment.nvim`: Toggle comments.
+### Neovim
 
-- **Formatting & Linting**:
-    - `formatter.nvim`: Code formatter for various languages.
-    - `nvim-lint`: Linting support for different file types.
+Full IDE experience with plugin management via Packer.
 
-- **Not Covered; Installed Separate**
-    - `ocamllsp`: LSP Managed Separate
-    - `lua_ls`: LSP Managed Separate
-    - `gopls`: LSP Managed Separate (vim-go might do this now?)
-    - `r_language_server`: LSP Managed Separate
-    - `pyrite`: LSP Managed Separate
-    - `ruff`: LSP Managed Separate
-    - Code Formatters Managed Separate, but configuration done through [conform](https://github.com/stevearc/conform.nvim)
+**Plugins:**
+- `gruvbox` colorscheme with `vim-airline` status line
+- `nvim-cmp` autocompletion with LSP, buffer, and path sources
+- `nvim-treesitter` for syntax highlighting
+- `NERDTree` + `fzf` for file navigation
+- `formatter.nvim` + `nvim-lint` for code formatting/linting
 
+**LSP Support:**
+- Go (`gopls`)
+- Python (`pyright`, `ruff`)
+- Lua (`lua_ls`)
+- R (`r_language_server`)
+- OCaml (`ocamllsp`)
 
-### LSP Configuration
+**Key Mappings:**
+| Key | Action |
+|-----|--------|
+| `<leader>n` | Open NERDTree |
+| `<C-n>` | Toggle NERDTree |
+| `gd` | Go to definition |
+| `K` | Show hover info |
+| `gr` | Go to references |
+| `<leader>rn` | Rename symbol |
+| `<C-Space>` | Trigger completion |
 
-The configuration supports LSP for multiple programming languages. Here's a quick rundown:
+### Fish Shell
 
-- **Go**: `gopls` LSP setup with formatting on save.
-- **Python**: `pyrite` and `ruff` for python language support.
-- **R**: `r_language_server` LSP for R
-- **Lua**: Using `lua_ls` for Lua LSP, with custom configurations for Neovim.
-- **OCaml**: `ocamllsp` for OCaml language support.
+**Features:**
+- Vi key bindings enabled by default
+- pyenv + pyenv-virtualenv auto-initialization
+- fzf key bindings for fuzzy search
+- Custom PATH setup for Homebrew, Go, opam
 
-### Autocompletion
+**Aliases:**
+- `xdg-open` -> `open` (Linux compatibility)
 
-The configuration includes autocompletion using `nvim-cmp`, with completion sources from:
+### Ghostty Terminal
 
-- LSP servers
-- Buffers
-- File paths
-- Command-line
+```
+Font:       FiraCode Nerd Font
+Theme:      Gruvbox Dark
+Cursor:     Underline
+Background: #1c2022
+```
 
-Key mappings for autocompletion:
-- `<C-Space>`: Trigger autocompletion.
-- `<CR>`: Confirm autocompletion.
-- `<TAB>` && `<S-TAB>`: cycle auto completion.
+**Keybindings:**
+- `Shift+Enter` - Insert literal newline
 
-### Formatting & Linting
+### Git
 
-- **Formatting**: Auto-formatting is set up with `formatter.nvim` and `nvim-lint`.
-  - Go, Lua, and R files are formatted automatically on save.
-  - Users need to install ecosystem specific formatters
-- **Linting**: Linting is powered by `nvim-lint`, with configurations for Lua files using `luacheck`.
+**Aliases:**
+| Alias | Command |
+|-------|---------|
+| `git l` | Pretty log with dates |
+| `git s` | Short status |
+| `git d` | Diff |
+| `git co` | Checkout |
+| `git cob` | Checkout new branch |
+| `git b` | List branches by date |
+| `git la` | List all aliases |
 
-### Language-Specific Indentation
+**Settings:**
+- SSH commit signing enabled
+- Auto whitespace fixing
+- Colored output
 
-The config automatically sets indentation rules based on file types. For example:
+## Manual Steps
 
-- **Lua**: 2 spaces (spaces enabled)
-- **Python**: 4 spaces (spaces enabled)
-- **Makefiles**: 4 spaces (tabs enabled)
-- **Go**: 4 spaces (tabs enabled)
-- **r**: 2 spaces (spaces enabled)
+Some things can't be automated:
 
-### Key Mappings
+1. **Change default shell to Fish:**
+   ```bash
+   echo $(which fish) | sudo tee -a /etc/shells
+   chsh -s $(which fish)
+   ```
 
-Several custom key mappings have been set up for quick access to various features:
+2. **Install LSP servers:** (varies by language)
+   ```bash
+   # Go
+   go install golang.org/x/tools/gopls@latest
 
-- **File Navigation**:
-    - `<leader>n`: Open NERDTree.
-    - `<C-n>`: Toggle NERDTree.
-    - `<C-f>`: Focus NERDTree on the current file.
+   # Python
+   pip install pyright ruff
 
-- **LSP**:
-    - `gd`: Go to definition.
-    - `K`: Show hover info.
-    - `gr`: Go to references.
-    - `<leader>rn`: Rename symbol.
+   # Lua
+   brew install lua-language-server
+   ```
 
-- **Diagnostic**:
-    - `<leader>d`: Open diagnostic floating window.
-    - `[d` and `]d`: Navigate to previous and next diagnostic.
+3. **Set up Git signing key:** Add your SSH key to `.gitconfig`:
+   ```ini
+   [user]
+       signingkey =
+   ```
 
-- **Window Management**:
-    - `<C-h>`, `<C-j>`, `<C-k>`, `<C-l>`: Move between split windows.
-    - `<leader>h`, `<leader>l`: Switch between buffers.
+## File Structure
 
-### Visual Enhancements
-- **Colors**: Uses `gruvbox` as the primary color scheme with `vim-airline` for the status line.
-- **Fonts**: The setup assumes you're using a terminal with support for true color (e.g., `termguicolors` enabled).
+```
+dotfiles/
+├── .config/
+│   ├── fish/
+│   │   ├── config.fish
+│   │   └── fish_variables
+│   ├── ghostty/
+│   │   └── config
+│   └── nvim/
+│       └── init.lua
+├── .gitattributes
+├── .gitconfig
+├── .commit-template.txt
+├── Brewfile
+├── install.sh
+├── Makefile
+└── README.md
+```
 
-### General Settings
-- **History**: `500` lines of command history.
-- **Autoread**: Automatically read files when modified outside of Neovim.
-- **Line Numbers**: Relative and absolute line numbers.
-- **Mouse**: Enabled in normal and visual modes (`mouse = "nv"`).
+## License
+
+MIT
