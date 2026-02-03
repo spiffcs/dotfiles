@@ -12,6 +12,12 @@ set PATH ~/go/bin $PATH
 set PATH ~/.local/bin $PATH
 set PATH ~/.opam/default/bin $PATH
 
+# Load pyenv automatically by appending
+status is-interactive; and source (pyenv init -| psub)
+
+# (Optional) Enable pyenv-virtualenv integration
+status is-interactive; and source (pyenv virtualenv-init -| psub)
+
 # Set up fzf key bindings
 fzf --fish | source
 

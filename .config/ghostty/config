@@ -1,8 +1,9 @@
 font-family = FiraCode Nerd Font
-theme = GruvboxDarkHard
+theme = Gruvbox Dark
 cursor-style = underline
 mouse-hide-while-typing = true
 mouse-scroll-multiplier = 2
 window-padding-balance = true
 background = 1c2022
 unfocused-split-opacity = 0.9
+keybind = shift+enter=text:\n
