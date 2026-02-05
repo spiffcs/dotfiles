@@ -1,5 +1,5 @@
 font-family = FiraCode Nerd Font
-theme = Gruvbox Dark
+theme = "Gruvbox Dark Hard"
 cursor-style = underline
 mouse-hide-while-typing = true
 mouse-scroll-multiplier = 2
