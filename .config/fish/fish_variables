@@ -2,5 +2,5 @@
 # VERSION: 3.0
 SETUVAR __fish_initialized:4300
 SETUVAR _fisher_upgraded_to_4_4:\x1d
-SETUVAR fish_key_bindings:fish_default_key_bindings
+SETUVAR fish_key_bindings:fish_vi_key_bindings
 SETUVAR fish_user_paths:/Applications/Ghostty\x2eapp/Contents/MacOS
