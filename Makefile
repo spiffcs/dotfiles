@@ -28,14 +28,6 @@ clean:
 
 # Show help
 help:
-	@echo "Dotfiles Makefile"
-	@echo ""
-	@echo "Usage: make [target]"
-	@echo ""
-	@echo "Targets:"
-	@echo "  all      Install everything (dependencies + symlinks)"
-	@echo "  deps     Install Homebrew dependencies only"
-	@echo "  symlink  Create symlinks only"
-	@echo "  dry-run  Preview what would be done"
-	@echo "  clean    Remove all symlinks"
-	@echo "  help     Show this help message"
+	@grep -E '^[a-zA-Z_-]+:.*##' $(MAKEFILE_LIST) | \
+		awk 'BEGIN {FS = ":.*## "; printf "Dotfiles Makefile\n\nUsage: make [target]\n\nTargets:\n"} \
+		{printf "  %-10s %s\n", $$1, $$2}'

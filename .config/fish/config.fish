@@ -14,11 +14,11 @@ set PATH ~/.opam/default/bin $PATH
 set PATH $HOME/.cargo/bin $PATH
 set PATH $HOME/miniconda3/bin $PATH
 
-# Load pyenv automatically by appending
-status is-interactive; and source (pyenv init -| psub)
-
-# (Optional) Enable pyenv-virtualenv integration
-status is-interactive; and source (pyenv virtualenv-init -| psub)
+# Load pyenv automatically if installed
+if command -q pyenv
+    status is-interactive; and source (pyenv init -| psub)
+    status is-interactive; and source (pyenv virtualenv-init -| psub)
+end
 
 # Set up fzf key bindings
 fzf --fish | source
