@@ -17,7 +17,11 @@ set PATH $HOME/miniconda3/bin $PATH
 # Load pyenv automatically if installed
 if command -q pyenv
     status is-interactive; and source (pyenv init -| psub)
-    status is-interactive; and source (pyenv virtualenv-init -| psub)
+end
+
+# Load uv shell completions if installed
+if command -q uv
+    uv generate-shell-completion fish | source
 end
 
 # Set up fzf key bindings
