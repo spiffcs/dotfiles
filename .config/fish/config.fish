@@ -12,12 +12,6 @@ set PATH ~/go/bin $PATH
 set PATH ~/.local/bin $PATH
 set PATH ~/.opam/default/bin $PATH
 set PATH $HOME/.cargo/bin $PATH
-set PATH $HOME/miniconda3/bin $PATH
-
-# Load pyenv automatically if installed
-if command -q pyenv
-    status is-interactive; and source (pyenv init -| psub)
-end
 
 # Load uv shell completions if installed
 if command -q uv
@@ -30,17 +24,3 @@ fzf --fish | source
 if status is-interactive
     # Commands to run in interactive sessions can go here
 end
-
-# >>> conda initialize >>>
-# !! Contents within this block are managed by 'conda init' !!
-if test -f /Users/hal/miniconda3/bin/conda
-    eval /Users/hal/miniconda3/bin/conda "shell.fish" "hook" $argv | source
-else
-    if test -f "/Users/hal/miniconda3/etc/fish/conf.d/conda.fish"
-        . "/Users/hal/miniconda3/etc/fish/conf.d/conda.fish"
-    else
-        set -x PATH "/Users/hal/miniconda3/bin" $PATH
-    end
-end
-# <<< conda initialize <<<
-

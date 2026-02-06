@@ -15,6 +15,7 @@ DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DRY_RUN=false
 DO_SYMLINK=false
 DO_DEPS=false
+DO_FISH=false
 
 # -----------------------------------------------------------------------------
 # Helper functions
@@ -127,6 +128,38 @@ symlink_root_file() {
     fi
 }
 
+symlink_fish_config() {
+    local fish_dir="$HOME/.config/fish"
+
+    # Ensure fish config directories exist as real directories
+    for dir in "$fish_dir" "$fish_dir/conf.d" "$fish_dir/functions"; do
+        if [[ -L "$dir" ]]; then
+            if $DRY_RUN; then
+                print_dry "Would remove directory symlink: $dir"
+                print_dry "Would create real directory: $dir"
+            else
+                rm "$dir"
+                print_info "Removed directory symlink: $dir"
+            fi
+        fi
+        if [[ ! -d "$dir" ]]; then
+            if $DRY_RUN; then
+                print_dry "Would create directory: $dir"
+            else
+                mkdir -p "$dir"
+                print_info "Created directory: $dir"
+            fi
+        fi
+    done
+
+    # Symlink individual fish config files we own
+    create_symlink "$DOTFILES_DIR/.config/fish/config.fish" "$fish_dir/config.fish"
+    create_symlink "$DOTFILES_DIR/.config/fish/conf.d/rustup.fish" "$fish_dir/conf.d/rustup.fish"
+    create_symlink "$DOTFILES_DIR/.config/fish/functions/cat.fish" "$fish_dir/functions/cat.fish"
+    create_symlink "$DOTFILES_DIR/.config/fish/functions/fish_greeting.fish" "$fish_dir/functions/fish_greeting.fish"
+    create_symlink "$DOTFILES_DIR/.config/fish/fish_plugins" "$fish_dir/fish_plugins"
+}
+
 do_symlink() {
     print_info "Creating symlinks..."
     echo
@@ -142,7 +175,7 @@ do_symlink() {
 
     # Symlink .config directories
     print_info "Symlinking .config directories..."
-    symlink_config_dir "fish"
+    symlink_fish_config
     symlink_config_dir "ghostty"
     symlink_config_dir "nvim"
     echo
@@ -188,6 +221,103 @@ do_deps() {
 }
 
 # -----------------------------------------------------------------------------
+# Build fish from source
+# -----------------------------------------------------------------------------
+
+do_fish() {
+    print_info "Building fish shell from source..."
+    echo
+
+    # Check prerequisites
+    local missing=()
+    for cmd in cmake cargo cc; do
+        if ! command -v "$cmd" &> /dev/null; then
+            missing+=("$cmd")
+        fi
+    done
+    if [[ ${#missing[@]} -gt 0 ]]; then
+        print_error "Missing required tools: ${missing[*]}"
+        print_info "Install cmake via Homebrew (brew install cmake) or your package manager"
+        print_info "Install cargo via rustup (https://rustup.rs)"
+        exit 1
+    fi
+
+    # Get latest release tag from GitHub
+    print_info "Querying GitHub for latest fish release..."
+    local latest_tag
+    latest_tag=$(curl -fsSL https://api.github.com/repos/fish-shell/fish-shell/releases/latest | grep '"tag_name"' | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/')
+    if [[ -z "$latest_tag" ]]; then
+        print_error "Failed to determine latest fish release tag"
+        exit 1
+    fi
+    print_info "Latest release: $latest_tag"
+
+    # Check if already installed at this version
+    if command -v "$HOME/.local/bin/fish" &> /dev/null; then
+        local current_version
+        current_version=$("$HOME/.local/bin/fish" --version 2>/dev/null || true)
+        if [[ "$current_version" == *"${latest_tag#*-}"* ]] 2>/dev/null; then
+            print_success "fish $latest_tag is already installed at ~/.local/bin/fish"
+            return 0
+        fi
+    fi
+
+    if $DRY_RUN; then
+        print_dry "Would clone fish-shell/fish-shell at tag $latest_tag"
+        print_dry "Would build with cmake (install prefix: \$HOME/.local)"
+        print_dry "Would install to ~/.local/bin/fish"
+        return 0
+    fi
+
+    # Clone into a temp directory
+    local build_dir
+    build_dir=$(mktemp -d)
+    trap "rm -rf '$build_dir'" EXIT
+
+    print_info "Cloning fish-shell at $latest_tag into $build_dir..."
+    git clone --depth 1 --branch "$latest_tag" https://github.com/fish-shell/fish-shell.git "$build_dir/fish-shell"
+
+    # Build with cmake
+    print_info "Building fish..."
+    cmake -S "$build_dir/fish-shell" -B "$build_dir/fish-shell/build" \
+        -DCMAKE_INSTALL_PREFIX="$HOME/.local" \
+        -DCMAKE_BUILD_TYPE=Release
+    cmake --build "$build_dir/fish-shell/build"
+
+    print_info "Installing fish to ~/.local..."
+    cmake --install "$build_dir/fish-shell/build"
+
+    # Clean up (trap handles this, but be explicit)
+    rm -rf "$build_dir"
+    trap - EXIT
+
+    # Verify
+    if "$HOME/.local/bin/fish" --version &> /dev/null; then
+        print_success "fish installed: $("$HOME/.local/bin/fish" --version)"
+    else
+        print_error "fish installation failed — ~/.local/bin/fish not working"
+        exit 1
+    fi
+
+    # Install Fisher and plugins (reads fish_plugins)
+    print_info "Installing Fisher and plugins..."
+    "$HOME/.local/bin/fish" -c '
+        curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source
+        fisher install jorgebucaran/fisher
+        fisher update
+    '
+    print_success "Fisher and plugins installed"
+
+    echo
+    print_info "To use fish as your default shell:"
+    print_info "  1. Add ~/.local/bin/fish to /etc/shells:"
+    print_info "     echo \$HOME/.local/bin/fish | sudo tee -a /etc/shells"
+    print_info "  2. Change your shell:"
+    print_info "     chsh -s \$HOME/.local/bin/fish"
+    echo
+}
+
+# -----------------------------------------------------------------------------
 # Interactive mode
 # -----------------------------------------------------------------------------
 
@@ -200,31 +330,37 @@ interactive_mode() {
     echo "Repository: $DOTFILES_DIR"
     echo
     echo "Options:"
-    echo "  1) Install everything (dependencies + symlinks)"
+    echo "  1) Install everything (dependencies + fish + symlinks)"
     echo "  2) Install dependencies only (Homebrew packages)"
-    echo "  3) Create symlinks only"
-    echo "  4) Dry run (show what would happen)"
-    echo "  5) Exit"
+    echo "  3) Build fish from source"
+    echo "  4) Create symlinks only"
+    echo "  5) Dry run (show what would happen)"
+    echo "  6) Exit"
     echo
-    read -rp "Choose an option [1-5]: " choice
+    read -rp "Choose an option [1-6]: " choice
 
     case $choice in
         1)
             do_deps
+            do_fish
             do_symlink
             ;;
         2)
             do_deps
             ;;
         3)
-            do_symlink
+            do_fish
             ;;
         4)
-            DRY_RUN=true
-            do_deps
             do_symlink
             ;;
         5)
+            DRY_RUN=true
+            do_deps
+            do_fish
+            do_symlink
+            ;;
+        6)
             echo "Exiting."
             exit 0
             ;;
@@ -246,8 +382,9 @@ Usage: $(basename "$0") [OPTIONS]
 Bootstrap dotfiles on a fresh machine.
 
 Options:
-    --all       Install everything (dependencies + symlinks)
+    --all       Install everything (dependencies + fish + symlinks)
     --deps      Install Homebrew dependencies only
+    --fish      Build and install fish from source
     --symlink   Create symlinks only
     --dry-run   Show what would be done without making changes
     -h, --help  Show this help message
@@ -255,6 +392,7 @@ Options:
 Examples:
     $(basename "$0")              # Interactive mode
     $(basename "$0") --all        # Full installation
+    $(basename "$0") --fish       # Build fish from source only
     $(basename "$0") --symlink    # Symlinks only (if deps already installed)
     $(basename "$0") --dry-run    # Preview all changes
 
@@ -271,11 +409,16 @@ main() {
         case $1 in
             --all)
                 DO_DEPS=true
+                DO_FISH=true
                 DO_SYMLINK=true
                 shift
                 ;;
             --deps)
                 DO_DEPS=true
+                shift
+                ;;
+            --fish)
+                DO_FISH=true
                 shift
                 ;;
             --symlink)
@@ -306,7 +449,7 @@ main() {
     echo
 
     # If no action flags specified, run interactive mode
-    if ! $DO_DEPS && ! $DO_SYMLINK; then
+    if ! $DO_DEPS && ! $DO_FISH && ! $DO_SYMLINK; then
         interactive_mode
         exit 0
     fi
@@ -314,6 +457,10 @@ main() {
     # Execute requested actions
     if $DO_DEPS; then
         do_deps
+    fi
+
+    if $DO_FISH; then
+        do_fish
     fi
 
     if $DO_SYMLINK; then

@@ -2,16 +2,12 @@
 # Install with: brew bundle
 
 # Core tools
-brew "fish"
+brew "cmake"
 brew "neovim"
 brew "git"
 brew "fzf"
 brew "bat"
 brew "ripgrep"
-
-# Python environment
-brew "pyenv"
-brew "pyenv-virtualenv"
 
 # Formatters
 brew "stylua"
