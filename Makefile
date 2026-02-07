@@ -1,4 +1,4 @@
-.PHONY: all deps rust lsp fish symlink clean dry-run help
+.PHONY: all deps rust lsp fish symlink clean clean-backups dry-run help
 
 # Default target
 all: deps rust lsp fish symlink
@@ -32,6 +32,8 @@ clean:
 	@echo "Removing symlinks..."
 	@rm -f ~/.config/fish/config.fish 2>/dev/null || true
 	@rm -f ~/.config/fish/conf.d/rustup.fish 2>/dev/null || true
+	@rm -f ~/.config/fish/conf.d/gruvbox-theme.fish 2>/dev/null || true
+	@rm -f ~/.config/fish/conf.d/tide-config.fish 2>/dev/null || true
 	@rm -f ~/.config/fish/functions/cat.fish 2>/dev/null || true
 	@rm -f ~/.config/fish/functions/fish_greeting.fish 2>/dev/null || true
 	@rm -f ~/.config/fish/fish_plugins 2>/dev/null || true
@@ -43,6 +45,10 @@ clean:
 	@rm -f ~/.commit-template.txt 2>/dev/null || true
 	@echo "Done. Symlinks removed."
 
+# Remove backup files left by install.sh
+clean-backups:
+	@./install.sh --clean-backups
+
 # Show help
 help:
 	@echo "Dotfiles Makefile"
@@ -50,12 +56,13 @@ help:
 	@echo "Usage: make [target]"
 	@echo ""
 	@echo "Targets:"
-	@echo "  all       Install everything (deps + rust + lsp + fish + symlinks)"
-	@echo "  deps      Install Homebrew dependencies"
-	@echo "  rust      Install Rust stable toolchain"
-	@echo "  lsp       Install LSP servers (gopls, pyright, ruff, rust-analyzer, metals)"
-	@echo "  fish      Build fish from source"
-	@echo "  symlink   Create symlinks only"
-	@echo "  dry-run   Preview all changes"
-	@echo "  clean     Remove symlinks"
-	@echo "  help      Show this message"
+	@echo "  all             Install everything (deps + rust + lsp + fish + symlinks)"
+	@echo "  deps            Install Homebrew dependencies"
+	@echo "  rust            Install Rust stable toolchain"
+	@echo "  lsp             Install LSP servers"
+	@echo "  fish            Build fish from source"
+	@echo "  symlink         Create symlinks only"
+	@echo "  dry-run         Preview all changes"
+	@echo "  clean           Remove symlinks"
+	@echo "  clean-backups   Remove *.backup.* files left by install.sh"
+	@echo "  help            Show this message"

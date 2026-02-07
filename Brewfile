@@ -16,6 +16,9 @@ brew "tree"
 brew "uv"
 brew "wget"
 
+# Third-party taps
+tap "coursier/formulas"
+
 # Dev languages & runtimes
 brew "coursier/formulas/coursier"
 brew "go"
@@ -43,6 +46,7 @@ brew "zizmor"
 
 # LSP servers & formatters
 brew "lua-language-server"
+brew "shellcheck"
 brew "stylua"
 brew "tree-sitter"
 
@@ -59,7 +63,8 @@ brew "jq"
 brew "ncdu"
 brew "procs"
 
-# Casks (GUI applications and fonts)
+# Casks (GUI applications, fonts, and CLI tools)
+cask "claude-code"
 cask "bruno"
 cask "docker-desktop"
 cask "font-fira-code-nerd-font"
