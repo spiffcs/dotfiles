@@ -2,10 +2,9 @@
 	whitespace = fix
 
 [core]
-	excludesfile = ~/.gitignore
 	attributesfile = ~/.gitattributes
 	whitespace = fix,space-before-tab,tab-in-indent,trailing-space
-	editor = vi
+	editor = nvim
 
 [color]
 	ui = auto
@@ -32,7 +31,7 @@
 [alias]
 	l = log --pretty=format:"%C(yellow)%h\\ %ad%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=short
 	a = add
-	c = commit --verbose
+	c = commit --verbose --signoff
 	ca = commit -a --verbose
 	cm = commit -m
 	cam = commit -a -m
@@ -48,12 +47,11 @@
 	# list aliases
 	la = "!git config -l | grep alias | cut -c 7-"
 
-[user]
-	name = Christopher Phillips
-
-[gpg]
-	format = ssh
+[include]
+	path = ~/.gitconfig.local
 
 [commit]
 	gpgsign = true
+	template = ~/.commit-template.txt
+	verbose = true
 

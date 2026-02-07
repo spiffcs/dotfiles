@@ -5,7 +5,6 @@
 --    -> Plugins
 --    -> General Settings
 --    -> LSP and Completion
---    -> Formatting, Linting, and Treesitter
 --    -> Filetype-Specific Settings
 --    -> Keybindings
 --    -> Lua Script Imports
@@ -14,96 +13,294 @@
 -- Plugins
 -- -------------------------
 
--- Ensure packer is installed
-local ensure_packer = function()
-	local fn = vim.fn
-	local install_path = fn.stdpath("data") .. "/site/pack/packer/start/packer.nvim"
-	if fn.empty(fn.glob(install_path)) > 0 then
-		fn.system({
-			"git",
-			"clone",
-			"--depth",
-			"1",
-			"https://github.com/wbthomason/packer.nvim",
-			install_path,
-		})
-		vim.cmd([[packadd packer.nvim]])
-		return true
-	end
-	return false
+-- Set leader before lazy.nvim loads plugins
+vim.g.mapleader = ","
+
+-- Bootstrap lazy.nvim
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.uv.fs_stat(lazypath) then
+	vim.fn.system({
+		"git",
+		"clone",
+		"--filter=blob:none",
+		"https://github.com/folke/lazy.nvim.git",
+		"--branch=stable",
+		lazypath,
+	})
 end
+vim.opt.rtp:prepend(lazypath)
 
--- Packages to install
-local packer_bootstrap = ensure_packer()
-require("packer").startup(function(use)
-	-- Plugin management
-	use("wbthomason/packer.nvim") -- Packer can manage itself
+-- Disable netrw for nvim-tree
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
 
+require("lazy").setup({
 	-- UI and Appearance
-	use("morhetz/gruvbox")
-	use("vim-airline/vim-airline")
-	use("vim-airline/vim-airline-themes")
-	use("ntpeters/vim-better-whitespace")
-	use("preservim/nerdtree")
-	use("ellisonleao/glow.nvim")
+	{ "morhetz/gruvbox" },
+	{
+		"nvim-lualine/lualine.nvim",
+		dependencies = { "nvim-tree/nvim-web-devicons" },
+		opts = {
+			options = { theme = "gruvbox" },
+		},
+	},
+	{ "ntpeters/vim-better-whitespace" },
+	{
+		"nvim-tree/nvim-tree.lua",
+		dependencies = { "nvim-tree/nvim-web-devicons" },
+		opts = {},
+	},
+	{ "ellisonleao/glow.nvim", opts = {} },
 
 	-- Completion and LSP
-	use("neovim/nvim-lspconfig")
-	use("hrsh7th/cmp-nvim-lsp")
-	use("hrsh7th/cmp-buffer")
-	use("hrsh7th/cmp-path")
-	use("hrsh7th/cmp-cmdline")
-	use("hrsh7th/nvim-cmp")
-	use({
+	{
+		"neovim/nvim-lspconfig",
+		dependencies = { "hrsh7th/cmp-nvim-lsp" },
+		config = function()
+			-- Global LSP config: attach nvim-cmp capabilities to all servers
+			vim.lsp.config("*", {
+				capabilities = require("cmp_nvim_lsp").default_capabilities(),
+			})
+
+			-- Lua Language Server
+			vim.lsp.config("lua_ls", {
+				on_init = function(client)
+					if client.workspace_folders then
+						local path = client.workspace_folders[1].name
+						if vim.uv.fs_stat(path .. "/.luarc.json") or vim.uv.fs_stat(path .. "/.luarc.jsonc") then
+							return
+						end
+					end
+					client.config.settings.Lua = vim.tbl_deep_extend("force", client.config.settings.Lua, {
+						runtime = { version = "LuaJIT" },
+						workspace = {
+							checkThirdParty = false,
+							library = { vim.env.VIMRUNTIME },
+						},
+					})
+				end,
+				settings = {
+					Lua = {},
+				},
+			})
+
+			-- Go Language Server
+			vim.lsp.config("gopls", {
+				settings = {
+					gopls = {
+						analyses = {
+							unusedparams = true,
+							shadow = true,
+						},
+						staticcheck = true,
+					},
+				},
+			})
+
+			-- Pyright Language Server
+			vim.lsp.config("pyright", {
+				settings = {
+					pyright = {
+						-- Using Ruff's import organizer
+						disableOrganizeImports = true,
+					},
+					python = {
+						analysis = {
+							-- Ignore all files for analysis to exclusively use Ruff for linting
+							ignore = { "*" },
+						},
+					},
+				},
+			})
+
+			-- Enable all configured servers
+			vim.lsp.enable({
+				"lua_ls",
+				"gopls",
+				"rust_analyzer",
+				"pyright",
+				"ruff",
+				"r_language_server",
+				"ocamllsp",
+			})
+		end,
+	},
+	{
+		"hrsh7th/nvim-cmp",
+		dependencies = {
+			"hrsh7th/cmp-nvim-lsp",
+			"hrsh7th/cmp-buffer",
+			"hrsh7th/cmp-path",
+		},
+		config = function()
+			local cmp = require("cmp")
+			cmp.setup({
+				sources = {
+					{ name = "nvim_lsp" },
+					{ name = "buffer" },
+					{ name = "path" },
+				},
+				mapping = cmp.mapping.preset.insert({
+					["<C-Space>"] = cmp.mapping.complete(),
+					["<CR>"] = cmp.mapping.confirm({ select = true }),
+					["<Tab>"] = cmp.mapping(function(fallback)
+						if cmp.visible() then
+							cmp.select_next_item()
+						else
+							fallback()
+						end
+					end, { "i", "s" }),
+					["<S-Tab>"] = cmp.mapping(function(fallback)
+						if cmp.visible() then
+							cmp.select_prev_item()
+						else
+							fallback()
+						end
+					end, { "i", "s" }),
+				}),
+			})
+		end,
+	},
+	{
 		"nvim-treesitter/nvim-treesitter",
-		run = ":TSUpdate",
-	})
+		build = ":TSUpdate",
+		config = function()
+			require("nvim-treesitter").setup()
+
+			-- Ensure parsers are installed
+			local wanted = {
+				"c",
+				"lua",
+				"vim",
+				"vimdoc",
+				"r",
+				"python",
+				"go",
+				"ocaml",
+				"scala",
+				"markdown",
+				"markdown_inline",
+				"rnoweb",
+				"yaml",
+				"csv",
+			}
+			local installed = require("nvim-treesitter.config").get_installed()
+			local missing = vim.tbl_filter(function(lang)
+				return not vim.list_contains(installed, lang)
+			end, wanted)
+			if #missing > 0 then
+				require("nvim-treesitter.install").install(missing, { summary = true })
+			end
+
+			-- Enable treesitter-based highlighting and indentation
+			vim.api.nvim_create_autocmd("FileType", {
+				group = vim.api.nvim_create_augroup("treesitter_start", { clear = true }),
+				callback = function(ev)
+					if pcall(vim.treesitter.start, ev.buf) then
+						vim.bo[ev.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+					end
+				end,
+			})
+		end,
+	},
 
 	-- Formatting and Linting
-	use("stevearc/conform.nvim")
-	use("mfussenegger/nvim-lint")
+	{
+		"stevearc/conform.nvim",
+		opts = {
+			formatters_by_ft = {
+				lua = { "stylua" },
+				go = { "gofmt", "goimports" },
+				python = { "ruff_fix", "ruff_format", "ruff_organize_imports" },
+				ocaml = { "ocamlformat" },
+				r = { "styler" },
+				rust = { "rustfmt" },
+			},
+			format_on_save = {
+				timeout_ms = 500,
+				lsp_format = "fallback",
+			},
+		},
+	},
+	{
+		"mfussenegger/nvim-lint",
+		config = function()
+			require("lint").linters_by_ft = {
+				lua = { "luacheck" },
+			}
+
+			vim.api.nvim_create_autocmd({ "BufWritePost", "BufReadPost" }, {
+				group = vim.api.nvim_create_augroup("nvim_lint", { clear = true }),
+				callback = function()
+					require("lint").try_lint()
+				end,
+			})
+		end,
+	},
 
 	-- Debugger
-	use({
+	{
 		"mfussenegger/nvim-dap",
-		requires = {
-			"rcarriga/nvim-dap-ui", -- UI for nvim-dap
-			"theHamsta/nvim-dap-virtual-text", --Virtual text for nvim-dap
-			"nvim-neotest/nvim-nio", --Async IO neovim
+		dependencies = {
+			"rcarriga/nvim-dap-ui",
+			"theHamsta/nvim-dap-virtual-text",
+			"nvim-neotest/nvim-nio",
+			"leoluz/nvim-dap-go",
 		},
-	})
-
-	use("leoluz/nvim-dap-go")
+		config = function()
+			require("dap-config")
+		end,
+	},
 
 	-- Language-specific
-	use({ "fatih/vim-go", run = ":GoUpdateBinaries" }) -- Go
-	use({ "R-nvim/R.nvim", lazy = false, version = "~0.1.0" }) -- R
-	use("rhysd/committia.vim") -- git commit highlighter
+	{ "R-nvim/R.nvim", version = "~0.99.0" },
+	{
+		"scalameta/nvim-metals",
+		dependencies = { "nvim-lua/plenary.nvim" },
+		ft = { "scala", "sbt" },
+		config = function()
+			local metals = require("metals")
+			local metals_config = metals.bare_config()
+			metals_config.capabilities = require("cmp_nvim_lsp").default_capabilities()
+
+			-- Ensure JAVA_HOME is set so the metals launcher can find java
+			if not vim.env.JAVA_HOME or vim.env.JAVA_HOME == "" then
+				local result = vim.fn.system("cs java-home --jvm 21 2>/dev/null")
+				if vim.v.shell_error == 0 then
+					vim.env.JAVA_HOME = vim.trim(result)
+				end
+			end
+
+			metals_config.settings = {
+				showImplicitArguments = true,
+				javaHome = vim.env.JAVA_HOME,
+			}
+
+			vim.api.nvim_create_autocmd("FileType", {
+				pattern = { "scala", "sbt" },
+				group = vim.api.nvim_create_augroup("nvim_metals", { clear = true }),
+				callback = function()
+					metals.initialize_or_attach(metals_config)
+				end,
+			})
+		end,
+	},
+	{ "rhysd/committia.vim" },
 
 	-- Code Navigation and Comments
-	use("junegunn/fzf")
-	use({ "nvim-telescope/telescope.nvim", requires = { "nvim-lua/plenary.nvim" } }) -- ui for rg
-	use({ "folke/todo-comments.nvim", dependences = { "nvim-lua/plenary.nvim" }, opts = {} }) -- TODO, HACK, NOTE, PERF, FIX, WARNING highlights & search
-	use({ -- Comment Support
-		"numToStr/Comment.nvim",
-		config = function()
-			require("Comment").setup()
-		end,
-	})
-
-	if packer_bootstrap then
-		require("packer").sync()
-	end
-end)
+	{ "junegunn/fzf.vim", dependencies = { "junegunn/fzf" } },
+	{
+		"folke/todo-comments.nvim",
+		dependencies = { "nvim-lua/plenary.nvim" },
+		opts = {},
+	},
+})
 
 -- -------------------------
 -- General Settings
 -- -------------------------
 
--- General
-vim.g.mapleader = ","
 vim.o.history = 500
-vim.o.autoread = true
 vim.o.number = true
 vim.o.numberwidth = 1
 vim.o.relativenumber = true
@@ -115,83 +312,47 @@ vim.o.ruler = true
 vim.o.cmdheight = 1
 vim.o.ignorecase = true
 vim.o.smartcase = true
-vim.o.hlsearch = true
-vim.o.incsearch = true
 vim.o.lazyredraw = true
-vim.o.magic = true
 vim.o.showmatch = true
 vim.o.matchtime = 2
 
 -- Misc
-vim.o.hidden = true
 vim.o.backup = false
 vim.o.writebackup = false
 vim.o.swapfile = false
 vim.o.updatetime = 100
-vim.o.shortmess = vim.o.shortmess .. "c"
+vim.opt.shortmess:append("c")
 vim.o.signcolumn = "yes"
 
 -- Colors and Fonts
 vim.o.termguicolors = true
 vim.o.background = "dark"
 vim.cmd("colorscheme gruvbox")
-vim.g.airline_theme = "base16_gruvbox_dark_hard"
-vim.o.encoding = "utf-8"
 
 -- -------------------------
 -- LSP and Completion
 -- -------------------------
 
--- Setup nvim-cmp for LSP completion
-local cmp = require("cmp")
-cmp.setup({
-	sources = {
-		{ name = "nvim_lsp" },
-		{ name = "buffer" }, -- Buffer completion source
-		{ name = "path" }, -- Path completion source
-	},
-	mapping = cmp.mapping.preset.insert({
-		["<C-Space>"] = cmp.mapping.complete(),
-		["<CR>"] = cmp.mapping.confirm({ select = true }),
-		-- Bind Tab to cycle forward through completions
-		["<Tab>"] = cmp.mapping(function(fallback)
-			if cmp.visible() then
-				cmp.select_next_item() -- Select next completion item
-			else
-				fallback() -- Fallback to default Tab behavior (e.g., indentation)
-			end
-		end, { "i", "s" }),
-		-- Bind Shift-Tab to cycle backward through completions
-		["<S-Tab>"] = cmp.mapping(function(fallback)
-			if cmp.visible() then
-				cmp.select_prev_item() -- Select previous completion item
-			else
-				fallback() -- Fallback to default Shift-Tab behavior (e.g., previous item in insert mode)
-			end
-		end, { "i", "s" }),
-	}),
-})
-
 -- Diagnostic settings
 vim.diagnostic.config({
-	virtual_text = false, -- Disable inline virtual text (optional, reduces clutter)
-	signs = true, -- Show signs in the gutter
-	underline = true, -- Underline the problematic code
-	update_in_insert = false, -- Update diagnostics only in normal mode
-	severity_sort = true, -- Sort diagnostics by severity
+	virtual_text = false,
+	signs = true,
+	underline = true,
+	update_in_insert = false,
+	severity_sort = true,
 	float = {
-		border = "rounded", -- Rounded border for better aesthetics
-		focusable = false, -- Prevent focusing the diagnostic window
-		source = true, -- Show the diagnostic source (e.g., "lua-language-server")
-		max_width = 80, -- Limit the width of the diagnostic float
-		max_height = 20, -- Limit the height of the diagnostic float
+		border = "rounded",
+		focusable = false,
+		source = true,
+		max_width = 80,
+		max_height = 20,
 	},
 })
 
 -- Open diagnostics on cursor hold
 vim.api.nvim_create_autocmd("CursorHold", {
 	callback = function()
-		vim.diagnostic.open_float(nil, { focusable = false })
+		vim.diagnostic.open_float({ focusable = false })
 	end,
 })
 
@@ -204,116 +365,7 @@ vim.api.nvim_create_autocmd("FileType", {
 	end,
 })
 
--- Keybindings for diagnostics
-vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float, { noremap = true, silent = true })
-vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { noremap = true, silent = true }) -- Previous diagnostic
-vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { noremap = true, silent = true }) -- Next diagnostic
-
--- -------------------------
--- Language Server Setup
--- -------------------------
-
--- Attach `nvim-cmp` to LSP
-local capabilities = require("cmp_nvim_lsp").default_capabilities()
-local lspconfig = require("lspconfig")
-
--- Lua Language Server
-lspconfig.lua_ls.setup({
-	settings = {
-		Lua = {
-			runtime = {
-				version = "LuaJIT", -- Lua version used
-				path = vim.split(package.path, ";"),
-			},
-			diagnostics = {
-				globals = { "vim" }, -- Recognize `vim` global
-			},
-			workspace = {
-				library = vim.api.nvim_get_runtime_file("", true), -- Neovim runtime files
-			},
-			telemetry = {
-				enable = false, -- Disable telemetry
-			},
-		},
-	},
-})
-
--- Go Language Server
-lspconfig.gopls.setup({
-	cmd = { "gopls" },
-	capabilities = capabilities,
-	filetypes = { "go", "gomod", "gowork", "gotmpl" },
-	root_dir = lspconfig.util.root_pattern("go.work", "go.mod", ".git"),
-	settings = {
-		gopls = {
-			analyses = {
-				unusedparams = true,
-				shadow = true,
-			},
-			staticcheck = true,
-		},
-	},
-})
-
--- Setup rust-analyzer
-lspconfig.rust_analyzer.setup({
-	on_attach = function(_, bufnr)
-		-- Key mappings for LSP
-		local opts = { noremap = true, silent = true }
-		local keymap = vim.api.nvim_buf_set_keymap
-		keymap(bufnr, "n", "gd", "<Cmd>lua vim.lsp.buf.definition()<CR>", opts)
-		keymap(bufnr, "n", "K", "<Cmd>lua vim.lsp.buf.hover()<CR>", opts)
-		keymap(bufnr, "n", "<leader>rn", "<Cmd>lua vim.lsp.buf.rename()<CR>", opts)
-	end,
-	capabilities = require("cmp_nvim_lsp").default_capabilities(),
-})
-
--- Python Pyright Langauge Server
-lspconfig.pyright.setup({
-	settings = {
-		pyright = {
-			-- Using Ruff's import organizer
-			disableOrganizeImports = true,
-		},
-		python = {
-			analysis = {
-				-- Ignore all files for analysis to exclusively use Ruff for linting
-				ignore = { "*" },
-			},
-		},
-	},
-})
-
--- Python Ruff Language Server
-lspconfig.ruff.setup({
-	-- define commands for BufWritePost
-	commands = {
-		RuffAutofix = {
-			function()
-				vim.lsp.buf.execute_command({
-					command = "ruff.applyAutofix",
-					arguments = {
-						{ uri = vim.uri_from_bufnr(0) },
-					},
-				})
-			end,
-			description = "Ruff: Fix all auto-fixable problems",
-		},
-		RuffOrganizeImports = {
-			function()
-				vim.lsp.buf.execute_command({
-					command = "ruff.applyOrganizeImports",
-					arguments = {
-						{ uri = vim.uri_from_bufnr(0) },
-					},
-				})
-			end,
-			description = "Ruff: Format imports",
-		},
-	},
-})
-
--- diable ruff in favor of Pyright
+-- Disable ruff hover so Pyright provides type-aware hover instead
 vim.api.nvim_create_autocmd("LspAttach", {
 	group = vim.api.nvim_create_augroup("lsp_attach_disable_ruff_hover", { clear = true }),
 	callback = function(args)
@@ -322,174 +374,70 @@ vim.api.nvim_create_autocmd("LspAttach", {
 			return
 		end
 		if client.name == "ruff" then
-			-- Disable hover in favor of Pyright
 			client.server_capabilities.hoverProvider = false
 		end
 	end,
 	desc = "LSP: Disable hover capability from Ruff",
 })
 
--- R Language Server
-lspconfig.r_language_server.setup({
-	cmd = { "R", "--slave", "-e", "languageserver::run()" },
-	filetypes = { "r", "rmd", "R" },
-	root_dir = lspconfig.util.root_pattern(".git", "."),
-	capabilities = capabilities,
-})
-
--- Ocaml Language Server
-lspconfig.ocamllsp.setup({
-	cmd = { "ocamllsp" }, -- Ensure the ocaml-lsp-server binary is in your PATH
-	capabilities = capabilities,
-	filetypes = { "ocaml", "ocamlinterface", "ocamllex" },
-	root_dir = lspconfig.util.root_pattern("*.opam", ".git", "dune-project", "dune-workspace"),
-	settings = {},
-})
+-- Keybinding for diagnostics
+vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float, { silent = true, desc = "Show diagnostic float" })
 
 -- -------------------------
--- Formatting, Linting, and Treesitter
+-- Filetype-Specific Settings
 -- -------------------------
 
--- Linting
-require("lint").linters_by_ft = {
-	lua = { "luacheck" }, -- Use luacheck for linting Lua files
-}
-
--- Treesitter setup
-require("nvim-treesitter.configs").setup({
-	modules = {},
-	ignore_install = {},
-	syntax = {
-		enable = true,
-		additional_vim_regex_highlighting = false,
-	},
-	sync_install = true,
-	auto_install = true,
-	-- Add Languages for Treesitter
-	ensure_installed = {
-		"c",
-		"lua",
-		"vim",
-		"vimdoc",
-		"r",
-		"python",
-		"go",
-		"ocaml",
-		"markdown",
-		"markdown_inline",
-		"rnoweb",
-		"yaml",
-		"csv",
-	},
-	highlight = {
-		enable = true, -- Enable syntax highlighting
-	},
-	indent = {
-		enable = true,
-	},
-})
-
--- Formatter setup
-require("conform").setup({
-	formatters_by_ft = {
-		lua = { "stylua" },
-		go = { "gofmt", "goimports" },
-		python = { "ruff_fix", "ruff_format", "ruff_organize_imports" },
-		ocaml = { "ocamlformat" },
-		-- Opt-in to default formatter for R files
-		r = { "styler" },
-		rust = { "rustfmt" },
-	},
-})
-
--- Auto group for format on write
-vim.api.nvim_create_autocmd("BufWritePre", {
-	pattern = "*",
-	callback = function(args)
-		require("conform").format({ bufnr = args.buf })
-	end,
-})
-
--- -------------------------
--- Filetype-Specific Setting
--- -------------------------
--- Create an autocommand group for clean configuration
-vim.cmd([[
-  augroup FileTypeSpecific
-    autocmd!
-  augroup END
-]])
-
--- Helper function to set tab/spaces configuration
-local function set_indentation(ft, tabsize, use_spaces)
-	local expandtab = use_spaces and "setlocal expandtab" or "setlocal noexpandtab"
-	vim.cmd(string.format(
-		[[
-    autocmd FileType %s setlocal tabstop=%d shiftwidth=%d | %s
-  ]],
-		ft,
-		tabsize,
-		tabsize,
-		expandtab
-	))
+local function set_indentation(pattern, tabsize, use_spaces)
+	vim.api.nvim_create_autocmd("FileType", {
+		pattern = pattern,
+		callback = function()
+			vim.bo.tabstop = tabsize
+			vim.bo.shiftwidth = tabsize
+			vim.bo.expandtab = use_spaces
+		end,
+	})
 end
 
--- Filetype-specific configurations
-set_indentation("lua", 2, true) -- Lua: 2 spaces, uses spaces
-set_indentation("python", 4, true) -- Python: 4 spaces, uses spaces
-set_indentation("make", 4, false) -- Makefiles: 4 spaces, uses tabs
-set_indentation("go", 4, false) -- Go: 4 spaces, uses tabs
-set_indentation("html", 2, true) -- HTML: 2 spaces, uses spaces
-set_indentation("javascript", 2, true) -- JavaScript: 2 spaces, uses spaces
-set_indentation("r", 2, true) -- R: 2 spaces, uses spaces
+set_indentation("lua", 2, true)
+set_indentation("python", 4, true)
+set_indentation("make", 4, false)
+set_indentation("go", 4, false)
+set_indentation("html", 2, true)
+set_indentation("javascript", 2, true)
+set_indentation("r", 2, true)
+set_indentation("scala", 2, true)
 
 -- -------------------------
 -- Keybindings
 -- -------------------------
 
--- General key mappings
-local opts = { noremap = true, silent = true }
+-- General
+vim.keymap.set("n", "<leader>w", ":w!<CR>", { silent = true, desc = "Quick save" })
+vim.keymap.set("n", "<leader>r", ":FZF<CR>", { silent = true, desc = "Fuzzy find files" })
 
-vim.api.nvim_set_keymap("n", "<leader>w", ":w!<CR>", opts)
-vim.api.nvim_set_keymap("n", "<leader>r", ":FZF<CR>", opts)
+-- nvim-tree
+vim.keymap.set("n", "<leader>n", ":NvimTreeFocus<CR>", { silent = true, desc = "Focus file tree" })
+vim.keymap.set("n", "<C-n>", ":NvimTreeToggle<CR>", { silent = true, desc = "Toggle file tree" })
+vim.keymap.set("n", "<C-f>", ":NvimTreeFindFile<CR>", { silent = true, desc = "Find file in tree" })
 
--- NerdTree key mappings
-vim.api.nvim_set_keymap("n", "<leader>n", ":NERDTreeFocus<CR>", opts)
-vim.api.nvim_set_keymap("n", "<C-n>", ":NERDTreeToggle<CR>", opts)
-vim.api.nvim_set_keymap("n", "<C-f>", ":NERDTreeFind<CR>", opts)
-vim.g.NERDTreeShowHidden = 1
+-- LSP (K, grr, gri, grn, gra are provided by nvim 0.11 defaults)
+vim.keymap.set("n", "gd", vim.lsp.buf.definition, { silent = true, desc = "Go to definition" })
+vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, { silent = true, desc = "Rename symbol" })
 
--- LSP goto, docs, references, rename
-vim.api.nvim_set_keymap("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", opts)
-vim.api.nvim_set_keymap("n", "K", "<cmd>lua vim.lsp.buf.hover()<CR>", opts)
-vim.api.nvim_set_keymap("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", opts)
-vim.api.nvim_set_keymap("n", "<leader>rn", "<cmd>lua vim.lsp.buf.rename()<CR>", opts)
-vim.api.nvim_set_keymap("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<CR>", opts)
-
--- File Search with ripgrep
-vim.api.nvim_set_keymap("n", "<leader>fw", "<cmd>Telescope live_grep<CR>", opts)
+-- File search with ripgrep
+vim.keymap.set("n", "<leader>fw", ":Rg<CR>", { silent = true, desc = "Ripgrep search" })
 
 -- Tabs, Windows and Buffers
-vim.api.nvim_set_keymap("n", "<Space>", "/", { noremap = false })
-vim.api.nvim_set_keymap("n", "<C-j>", "<C-W>j", opts)
-vim.api.nvim_set_keymap("n", "<C-k>", "<C-W>k", opts)
-vim.api.nvim_set_keymap("n", "<C-h>", "<C-W>h", opts)
-vim.api.nvim_set_keymap("n", "<C-l>", "<C-W>l", opts)
-vim.api.nvim_set_keymap("n", "<leader>=", "<C-w>=", opts)
-vim.api.nvim_set_keymap("n", "<leader>l", ":bnext<CR>", opts)
-vim.api.nvim_set_keymap("n", "<leader>h", ":bprevious<CR>", opts)
-vim.api.nvim_set_keymap("n", "<C-t>k", ":tabr<CR>", opts)
-vim.api.nvim_set_keymap("n", "<C-t>j", ":tabl<CR>", opts)
-vim.api.nvim_set_keymap("n", "<C-t>h", ":tabp<CR>", opts)
-vim.api.nvim_set_keymap("n", "<C-t>l", ":tabn<CR>", opts)
-vim.api.nvim_set_keymap("n", "<leader><CR>", ":nohlsearch<CR>", opts)
-
--- -------------------------
--- Lua Script Imports
--- -------------------------
-require("glow").setup()
-require("todo-comments").setup()
-require("dap-config")
-require("goautoimport")
-require("tele-rg")
-require("claude-inline")
+vim.keymap.set("n", "<Space>", "/", { remap = true, desc = "Search" })
+vim.keymap.set("n", "<C-j>", "<C-W>j", { silent = true, desc = "Window down" })
+vim.keymap.set("n", "<C-k>", "<C-W>k", { silent = true, desc = "Window up" })
+vim.keymap.set("n", "<C-h>", "<C-W>h", { silent = true, desc = "Window left" })
+vim.keymap.set("n", "<C-l>", "<C-W>l", { silent = true, desc = "Window right" })
+vim.keymap.set("n", "<leader>=", "<C-w>=", { silent = true, desc = "Equalize windows" })
+vim.keymap.set("n", "<leader>l", ":bnext<CR>", { silent = true, desc = "Next buffer" })
+vim.keymap.set("n", "<leader>h", ":bprevious<CR>", { silent = true, desc = "Previous buffer" })
+vim.keymap.set("n", "<C-t>k", ":tabr<CR>", { silent = true, desc = "First tab" })
+vim.keymap.set("n", "<C-t>j", ":tabl<CR>", { silent = true, desc = "Last tab" })
+vim.keymap.set("n", "<C-t>h", ":tabp<CR>", { silent = true, desc = "Previous tab" })
+vim.keymap.set("n", "<C-t>l", ":tabn<CR>", { silent = true, desc = "Next tab" })
+vim.keymap.set("n", "<leader><CR>", ":nohlsearch<CR>", { silent = true, desc = "Clear search highlight" })

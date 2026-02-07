@@ -1,0 +1,13 @@
+[user]
+	name = Your Name
+	signingkey = ssh-ed25519 YOUR_PUBLIC_KEY
+	email = your-email@example.com
+
+[gpg]
+	format = ssh
+
+[gpg "ssh"]
+	# 1Password: /Applications/1Password.app/Contents/MacOS/op-ssh-sign
+	# macOS built-in: /usr/bin/ssh-keygen
+	# GPG Suite: /usr/local/bin/gpg
+	program = /path/to/ssh-sign-program

@@ -82,5 +82,3 @@ end)
 vim.keymap.set("n", "<Leader>dl", function()
 	dap.run_last()
 end)
-
-print("Lua configuration loaded!")

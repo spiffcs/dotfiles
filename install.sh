@@ -15,6 +15,8 @@ DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DRY_RUN=false
 DO_SYMLINK=false
 DO_DEPS=false
+DO_RUST=false
+DO_LSP=false
 DO_FISH=false
 
 # -----------------------------------------------------------------------------
@@ -177,6 +179,7 @@ do_symlink() {
     print_info "Symlinking .config directories..."
     symlink_fish_config
     symlink_config_dir "ghostty"
+    symlink_config_dir "git"
     symlink_config_dir "nvim"
     echo
 
@@ -186,6 +189,28 @@ do_symlink() {
     symlink_root_file ".gitattributes"
     symlink_root_file ".commit-template.txt"
     echo
+
+    # Install nvim plugins
+    print_info "Installing nvim plugins..."
+    if command -v nvim &> /dev/null; then
+        if $DRY_RUN; then
+            print_dry "Would run: nvim --headless '+Lazy install' +qa"
+        else
+            nvim --headless "+Lazy install" +qa 2>&1
+            print_success "nvim plugins installed!"
+        fi
+    else
+        print_warning "nvim not found — skipping plugin install (run --deps first)"
+    fi
+    echo
+
+    # Remind about .gitconfig.local
+    if [[ ! -f "$HOME/.gitconfig.local" ]]; then
+        print_warning "~/.gitconfig.local not found — commit signing will not work"
+        print_info "Create it from the template:"
+        echo "  cp $DOTFILES_DIR/.gitconfig.local.example ~/.gitconfig.local"
+        echo
+    fi
 
     print_success "Symlink setup complete!"
 }
@@ -217,6 +242,106 @@ do_deps() {
         print_error "Brewfile not found at $DOTFILES_DIR/Brewfile"
         exit 1
     fi
+    echo
+}
+
+# -----------------------------------------------------------------------------
+# Install Rust toolchain
+# -----------------------------------------------------------------------------
+
+do_rust() {
+    print_info "Setting up Rust toolchain..."
+    echo
+
+    if ! command -v rustup &> /dev/null; then
+        print_error "rustup is not installed. Run --deps first to install it via Homebrew."
+        exit 1
+    fi
+
+    # Check if a default toolchain is already installed
+    if rustup toolchain list 2>/dev/null | grep -q 'stable'; then
+        print_success "Rust stable toolchain already installed"
+        if $DRY_RUN; then
+            print_dry "Would run: rustup update stable"
+        else
+            rustup update stable
+            print_success "Rust toolchain updated"
+        fi
+    else
+        if $DRY_RUN; then
+            print_dry "Would install Rust stable toolchain via rustup"
+        else
+            rustup toolchain install stable
+            rustup default stable
+            print_success "Rust stable toolchain installed"
+        fi
+    fi
+    echo
+}
+
+# -----------------------------------------------------------------------------
+# Install LSP servers
+# -----------------------------------------------------------------------------
+
+do_lsp() {
+    print_info "Installing LSP servers..."
+    echo
+
+    # gopls (requires Go)
+    if command -v go &> /dev/null; then
+        if $DRY_RUN; then
+            print_dry "Would run: go install golang.org/x/tools/gopls@latest"
+        else
+            go install golang.org/x/tools/gopls@latest
+            print_success "gopls installed"
+        fi
+    else
+        print_warning "go not found — skipping gopls (run --deps first)"
+    fi
+
+    # pyright + ruff (requires uv)
+    if command -v uv &> /dev/null; then
+        if $DRY_RUN; then
+            print_dry "Would run: uv tool install pyright"
+            print_dry "Would run: uv tool install ruff"
+        else
+            uv tool install pyright
+            print_success "pyright installed"
+            uv tool install ruff
+            print_success "ruff installed"
+        fi
+    else
+        print_warning "uv not found — skipping pyright and ruff (run --deps first)"
+    fi
+
+    # rust-analyzer (requires rustup)
+    if command -v rustup &> /dev/null; then
+        if $DRY_RUN; then
+            print_dry "Would run: rustup component add rust-analyzer"
+        else
+            rustup component add rust-analyzer
+            print_success "rust-analyzer installed"
+        fi
+    else
+        print_warning "rustup not found — skipping rust-analyzer (run --rust first)"
+    fi
+
+    # metals + JDK (requires coursier)
+    if command -v cs &> /dev/null; then
+        if $DRY_RUN; then
+            print_dry "Would run: cs java-home --jvm 21 (pre-cache JDK)"
+            print_dry "Would run: cs install metals"
+        else
+            print_info "Pre-caching JDK 21 via coursier..."
+            cs java-home --jvm 21 > /dev/null 2>&1
+            print_success "JDK 21 cached"
+            cs install metals
+            print_success "metals installed"
+        fi
+    else
+        print_warning "cs (coursier) not found — skipping metals (run --deps first)"
+    fi
+
     echo
 }
 
@@ -308,12 +433,31 @@ do_fish() {
     '
     print_success "Fisher and plugins installed"
 
-    echo
-    print_info "To use fish as your default shell:"
-    print_info "  1. Add ~/.local/bin/fish to /etc/shells:"
-    print_info "     echo \$HOME/.local/bin/fish | sudo tee -a /etc/shells"
-    print_info "  2. Change your shell:"
-    print_info "     chsh -s \$HOME/.local/bin/fish"
+    # Set fish as login shell
+    local fish_bin="$HOME/.local/bin/fish"
+    if ! grep -qxF "$fish_bin" /etc/shells 2>/dev/null; then
+        print_info "Adding $fish_bin to /etc/shells (requires sudo)..."
+        if $DRY_RUN; then
+            print_dry "Would add $fish_bin to /etc/shells"
+        else
+            echo "$fish_bin" | sudo tee -a /etc/shells > /dev/null
+            print_success "Added $fish_bin to /etc/shells"
+        fi
+    else
+        print_success "$fish_bin already in /etc/shells"
+    fi
+
+    if [[ "$SHELL" != "$fish_bin" ]]; then
+        print_info "Changing login shell to $fish_bin..."
+        if $DRY_RUN; then
+            print_dry "Would run: chsh -s $fish_bin"
+        else
+            chsh -s "$fish_bin"
+            print_success "Login shell changed to $fish_bin"
+        fi
+    else
+        print_success "Login shell is already $fish_bin"
+    fi
     echo
 }
 
@@ -330,18 +474,22 @@ interactive_mode() {
     echo "Repository: $DOTFILES_DIR"
     echo
     echo "Options:"
-    echo "  1) Install everything (dependencies + fish + symlinks)"
+    echo "  1) Install everything (dependencies + rust + LSP servers + fish + symlinks)"
     echo "  2) Install dependencies only (Homebrew packages)"
-    echo "  3) Build fish from source"
-    echo "  4) Create symlinks only"
-    echo "  5) Dry run (show what would happen)"
-    echo "  6) Exit"
+    echo "  3) Install Rust toolchain"
+    echo "  4) Install LSP servers (gopls, pyright, ruff, rust-analyzer, metals)"
+    echo "  5) Build fish from source"
+    echo "  6) Create symlinks only"
+    echo "  7) Dry run (show what would happen)"
+    echo "  8) Exit"
     echo
-    read -rp "Choose an option [1-6]: " choice
+    read -rp "Choose an option [1-8]: " choice
 
     case $choice in
         1)
             do_deps
+            do_rust
+            do_lsp
             do_fish
             do_symlink
             ;;
@@ -349,18 +497,26 @@ interactive_mode() {
             do_deps
             ;;
         3)
-            do_fish
+            do_rust
             ;;
         4)
-            do_symlink
+            do_lsp
             ;;
         5)
+            do_fish
+            ;;
+        6)
+            do_symlink
+            ;;
+        7)
             DRY_RUN=true
             do_deps
+            do_rust
+            do_lsp
             do_fish
             do_symlink
             ;;
-        6)
+        8)
             echo "Exiting."
             exit 0
             ;;
@@ -382,8 +538,10 @@ Usage: $(basename "$0") [OPTIONS]
 Bootstrap dotfiles on a fresh machine.
 
 Options:
-    --all       Install everything (dependencies + fish + symlinks)
+    --all       Install everything (deps + rust + LSP + fish + symlinks)
     --deps      Install Homebrew dependencies only
+    --rust      Install Rust stable toolchain via rustup
+    --lsp       Install LSP servers (gopls, pyright, ruff, rust-analyzer, metals)
     --fish      Build and install fish from source
     --symlink   Create symlinks only
     --dry-run   Show what would be done without making changes
@@ -392,6 +550,8 @@ Options:
 Examples:
     $(basename "$0")              # Interactive mode
     $(basename "$0") --all        # Full installation
+    $(basename "$0") --rust       # Install Rust toolchain only
+    $(basename "$0") --lsp        # Install LSP servers only
     $(basename "$0") --fish       # Build fish from source only
     $(basename "$0") --symlink    # Symlinks only (if deps already installed)
     $(basename "$0") --dry-run    # Preview all changes
@@ -409,12 +569,22 @@ main() {
         case $1 in
             --all)
                 DO_DEPS=true
+                DO_RUST=true
+                DO_LSP=true
                 DO_FISH=true
                 DO_SYMLINK=true
                 shift
                 ;;
             --deps)
                 DO_DEPS=true
+                shift
+                ;;
+            --rust)
+                DO_RUST=true
+                shift
+                ;;
+            --lsp)
+                DO_LSP=true
                 shift
                 ;;
             --fish)
@@ -449,7 +619,7 @@ main() {
     echo
 
     # If no action flags specified, run interactive mode
-    if ! $DO_DEPS && ! $DO_FISH && ! $DO_SYMLINK; then
+    if ! $DO_DEPS && ! $DO_RUST && ! $DO_LSP && ! $DO_FISH && ! $DO_SYMLINK; then
         interactive_mode
         exit 0
     fi
@@ -457,6 +627,14 @@ main() {
     # Execute requested actions
     if $DO_DEPS; then
         do_deps
+    fi
+
+    if $DO_RUST; then
+        do_rust
+    fi
+
+    if $DO_LSP; then
+        do_lsp
     fi
 
     if $DO_FISH; then
