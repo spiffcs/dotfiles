@@ -157,6 +157,7 @@ symlink_fish_config() {
     # Symlink individual fish config files we own
     create_symlink "$DOTFILES_DIR/.config/fish/config.fish" "$fish_dir/config.fish"
     create_symlink "$DOTFILES_DIR/.config/fish/conf.d/rustup.fish" "$fish_dir/conf.d/rustup.fish"
+    create_symlink "$DOTFILES_DIR/.config/fish/conf.d/gruvbox-theme.fish" "$fish_dir/conf.d/gruvbox-theme.fish"
     create_symlink "$DOTFILES_DIR/.config/fish/functions/cat.fish" "$fish_dir/functions/cat.fish"
     create_symlink "$DOTFILES_DIR/.config/fish/functions/fish_greeting.fish" "$fish_dir/functions/fish_greeting.fish"
     create_symlink "$DOTFILES_DIR/.config/fish/fish_plugins" "$fish_dir/fish_plugins"
