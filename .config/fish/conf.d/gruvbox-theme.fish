@@ -72,4 +72,7 @@ set -g tide_time_color 928374
 set -g tide_vi_mode_color_default A89984
 set -g tide_vi_mode_color_insert 83A598
 set -g tide_vi_mode_color_replace 8EC07C
+set -g tide_pwd_color_anchors D3869B
+set -g tide_pwd_color_dirs D3869B
+set -g tide_pwd_color_truncated_dirs 928374
 set -g tide_vi_mode_color_visual FE8019
