@@ -20,6 +20,7 @@ end
 
 # Set up fzf key bindings
 fzf --fish | source
+set -x FZF_DEFAULT_COMMAND 'fd --type f --hidden --follow --exclude .git'
 
 if status is-interactive
     # Commands to run in interactive sessions can go here
