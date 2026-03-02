@@ -22,7 +22,7 @@ do_deps() {
     return 0
   fi
 
-  if brew bundle --file="${DOTFILES_DIR}/Brewfile" --no-lock --verbose; then
+  if brew bundle --file="${DOTFILES_DIR}/Brewfile" --verbose; then
     echo
     print_success "All Homebrew dependencies installed!"
   else
