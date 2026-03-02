@@ -71,3 +71,12 @@ cask "font-fira-code-nerd-font"
 cask "ghostty"
 cask "gimp"
 cask "rectangle"
+
+# Unsorted (new since last organization)
+tap "anchore/grant"
+tap "anchore/grype"
+tap "homebrew/bundle"
+brew "lima"
+brew "syft"
+brew "tree-sitter-cli"
+cask "docker"
