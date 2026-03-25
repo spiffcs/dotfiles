@@ -249,7 +249,6 @@ Everything below is installed automatically via `make deps` (Brewfile), `make ru
 | [oras](https://oras.land) | Push and pull OCI artifacts to/from registries |
 | [cosign](https://github.com/sigstore/cosign) | Sign and verify container images and artifacts |
 | [grype](https://github.com/anchore/grype) | Vulnerability scanner for container images and filesystems |
-| [trivy](https://github.com/aquasecurity/trivy) | Comprehensive security scanner (images, IaC, secrets) |
 | [zizmor](https://github.com/woodruffw/zizmor) | GitHub Actions security linter |
 | [docker-compose](https://docs.docker.com/compose/) | Multi-container orchestration |
 

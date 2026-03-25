@@ -13,9 +13,12 @@ set PATH ~/.local/bin $PATH
 set PATH ~/.opam/default/bin $PATH
 set PATH $HOME/.cargo/bin $PATH
 
-# Load uv shell completions if installed
+# Generate uv completions file if missing (delete ~/.config/fish/completions/uv.fish to regenerate)
 if command -q uv
-    uv generate-shell-completion fish | source
+    set -l comp ~/.config/fish/completions/uv.fish
+    if not test -f $comp
+        uv generate-shell-completion fish >$comp
+    end
 end
 
 # Set up fzf key bindings

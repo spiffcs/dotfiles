@@ -41,7 +41,6 @@ brew "grype"
 brew "ollama"
 brew "oras"
 brew "skopeo"
-brew "trivy"
 brew "zizmor"
 
 # LSP servers & formatters
@@ -79,4 +78,3 @@ tap "homebrew/bundle"
 brew "lima"
 brew "syft"
 brew "tree-sitter-cli"
-cask "docker"
