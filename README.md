@@ -21,7 +21,7 @@ cd ~/dotfiles
 
 ## Prerequisites
 
-- **macOS** (tested on Sonoma)
+- **macOS** (tested on Sequoia)
 - **Homebrew** - [Install Homebrew](https://brew.sh)
 
 ## Installation
@@ -37,12 +37,14 @@ Presents a menu to choose what to install.
 ### Command Line Options
 
 ```bash
-./install.sh --all             # Install everything (deps + rust + LSP + fish + symlinks)
+./install.sh --all             # Install everything (deps + rust + LSP + fish + symlinks + audit)
 ./install.sh --deps            # Install Homebrew packages only
 ./install.sh --rust            # Install Rust stable toolchain
 ./install.sh --lsp             # Install LSP servers (gopls, pyright, ruff, rust-analyzer, metals)
 ./install.sh --fish            # Build fish from source
 ./install.sh --symlink         # Create symlinks only
+./install.sh --update          # Update all dependencies to latest versions
+./install.sh --audit           # Audit Homebrew packages for vulnerabilities
 ./install.sh --clean-backups   # Remove *.backup.* files left by previous runs
 ./install.sh --dry-run         # Preview changes without applying
 ```
@@ -50,12 +52,14 @@ Presents a menu to choose what to install.
 ### Using Make
 
 ```bash
-make all             # Install everything (deps + rust + lsp + fish + symlinks)
+make all             # Install everything (deps + rust + lsp + fish + symlinks + audit)
 make deps            # Install Homebrew packages
 make rust            # Install Rust toolchain
 make lsp             # Install LSP servers (gopls, pyright, ruff, rust-analyzer, metals)
 make fish            # Build fish from source
 make symlink         # Create symlinks only
+make update          # Update all dependencies to latest versions
+make audit           # Audit Homebrew packages for vulnerabilities
 make clean           # Remove symlinks
 make clean-backups   # Remove *.backup.* files left by install.sh
 make dry-run         # Preview changes
@@ -210,6 +214,7 @@ Everything below is installed automatically via `make deps` (Brewfile), `make ru
 | Tool | Description |
 |------|-------------|
 | [bat](https://github.com/sharkdp/bat) | `cat` clone with syntax highlighting and git integration |
+| [fd](https://github.com/sharkdp/fd) | Fast, user-friendly alternative to `find` |
 | [fzf](https://github.com/junegunn/fzf) | Fuzzy finder for files, history, and anything piped to it |
 | [ripgrep](https://github.com/BurntSushi/ripgrep) | Extremely fast recursive grep (powers `:Rg` in nvim) |
 | [tree](https://github.com/Old-Man-Programmer/tree) | Directory listing as a tree |
@@ -251,6 +256,7 @@ Everything below is installed automatically via `make deps` (Brewfile), `make ru
 | [grype](https://github.com/anchore/grype) | Vulnerability scanner for container images and filesystems |
 | [zizmor](https://github.com/woodruffw/zizmor) | GitHub Actions security linter |
 | [docker-compose](https://docs.docker.com/compose/) | Multi-container orchestration |
+| [brew-vulns](https://github.com/Homebrew/homebrew-brew-vulns) | Audit Homebrew packages for known vulnerabilities |
 
 ### Languages and Runtimes
 
@@ -277,7 +283,7 @@ Installed via `make lsp` and the Brewfile:
 | [lua-language-server](https://github.com/LuaLS/lua-language-server) | Lua | Lua language server |
 | [shellcheck](https://www.shellcheck.net) | Bash | Static analysis for shell scripts |
 | [stylua](https://github.com/JohnnyMorganz/StyLua) | Lua | Opinionated Lua formatter |
-| [tree-sitter](https://tree-sitter.github.io/tree-sitter/) | All | Parser generator for syntax highlighting |
+| [tree-sitter-cli](https://tree-sitter.github.io/tree-sitter/) | All | Parser generator for syntax highlighting (installed via cargo) |
 
 ### GUI Applications
 
@@ -327,17 +333,20 @@ dotfiles/
 │       └── lua/
 │           └── dap-config.lua       # DAP debugger setup
 ├── lib/                             # install.sh modules
+│   ├── audit.sh                     # Homebrew vulnerability audit
 │   ├── common.sh                    # Output helpers and spinner
 │   ├── deps.sh                      # Homebrew dependency installation
 │   ├── fish.sh                      # Build fish from source
 │   ├── fisher.sh                    # Fisher plugin manager bootstrap
 │   ├── lsp.sh                       # LSP server installation
 │   ├── rust.sh                      # Rust toolchain setup
-│   └── symlink.sh                   # Symlink creation and cleanup
+│   ├── symlink.sh                   # Symlink creation and cleanup
+│   └── update.sh                    # Update all dependencies
 ├── .gitattributes
 ├── .gitconfig
 ├── .gitconfig.local.example         # Template for machine-specific git identity
 ├── .commit-template.txt
+├── .wgetrc                          # Hardened wget defaults (HTTPS-only, cert validation)
 ├── Brewfile
 ├── install.sh                       # Thin dispatcher (sources lib/*.sh)
 ├── sync-brewfile.sh

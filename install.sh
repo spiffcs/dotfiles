@@ -13,6 +13,7 @@
 #   lsp.sh      — do_lsp (LSP servers)
 #   fish.sh     — do_fish (build fish from source)
 #   audit.sh    — do_audit (brew vulnerability audit)
+#   update.sh   — do_update (update all dependencies)
 
 set -uo pipefail
 
@@ -37,6 +38,8 @@ source "${DOTFILES_DIR}/lib/lsp.sh"
 source "${DOTFILES_DIR}/lib/fish.sh"
 # shellcheck source=lib/audit.sh
 source "${DOTFILES_DIR}/lib/audit.sh"
+# shellcheck source=lib/update.sh
+source "${DOTFILES_DIR}/lib/update.sh"
 
 # Flags
 DRY_RUN=false
@@ -47,6 +50,7 @@ DO_LSP=false
 DO_FISH=false
 DO_CLEAN_BACKUPS=false
 DO_AUDIT=false
+DO_UPDATE=false
 
 # Presents an interactive menu and sets action flags.
 interactive_mode() {
@@ -64,12 +68,13 @@ interactive_mode() {
   echo "  4) Install LSP servers"
   echo "  5) Build fish from source"
   echo "  6) Create symlinks only"
-  echo "  7) Audit Homebrew packages for vulnerabilities"
-  echo "  8) Clean up backup files"
-  echo "  9) Dry run (show what would happen)"
+  echo "  7) Update all dependencies"
+  echo "  8) Audit Homebrew packages for vulnerabilities"
+  echo "  9) Clean up backup files"
+  echo "  d) Dry run (show what would happen)"
   echo "  0) Exit"
   echo
-  read -rp "Choose an option [1-0]: " choice
+  read -rp "Choose an option [1-0,d]: " choice
 
   case "${choice}" in
     1) DO_DEPS=true; DO_RUST=true; DO_LSP=true
@@ -79,9 +84,10 @@ interactive_mode() {
     4) DO_LSP=true ;;
     5) DO_FISH=true ;;
     6) DO_SYMLINK=true ;;
-    7) DO_AUDIT=true ;;
-    8) DO_CLEAN_BACKUPS=true ;;
-    9) DRY_RUN=true; DO_DEPS=true; DO_RUST=true
+    7) DO_UPDATE=true ;;
+    8) DO_AUDIT=true ;;
+    9) DO_CLEAN_BACKUPS=true ;;
+    d) DRY_RUN=true; DO_DEPS=true; DO_RUST=true
        DO_LSP=true; DO_FISH=true; DO_SYMLINK=true; DO_AUDIT=true ;;
     0) exit 0 ;;
     *) print_error "Invalid option"; exit 1 ;;
@@ -102,6 +108,7 @@ Options:
     --fish            Build and install fish from source
     --symlink         Create symlinks only
     --audit           Audit Homebrew packages for vulnerabilities
+    --update          Update all dependencies to latest versions
     --clean-backups   Remove *.backup.* files
     --dry-run         Show what would be done
     -h, --help        Show this help message
@@ -128,6 +135,7 @@ main() {
       --fish)          DO_FISH=true; shift ;;
       --symlink)       DO_SYMLINK=true; shift ;;
       --audit)         DO_AUDIT=true; shift ;;
+      --update)        DO_UPDATE=true; shift ;;
       --clean-backups) DO_CLEAN_BACKUPS=true; shift ;;
       --dry-run)       DRY_RUN=true; shift ;;
       -h|--help)       usage; exit 0 ;;
@@ -147,7 +155,7 @@ main() {
 
   # No flags set — run interactive mode (which sets flags)
   if ! ${DO_DEPS} && ! ${DO_RUST} && ! ${DO_LSP} \
-    && ! ${DO_FISH} && ! ${DO_SYMLINK} && ! ${DO_AUDIT} && ! ${DO_CLEAN_BACKUPS}; then
+    && ! ${DO_FISH} && ! ${DO_SYMLINK} && ! ${DO_AUDIT} && ! ${DO_UPDATE} && ! ${DO_CLEAN_BACKUPS}; then
     interactive_mode
   fi
 
@@ -156,6 +164,7 @@ main() {
   if ${DO_LSP}; then do_lsp; fi
   if ${DO_FISH}; then do_fish; fi
   if ${DO_SYMLINK}; then do_symlink; fi
+  if ${DO_UPDATE}; then do_update; fi
   if ${DO_AUDIT}; then do_audit; fi
   if ${DO_CLEAN_BACKUPS}; then do_clean_backups; fi
 

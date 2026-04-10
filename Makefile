@@ -1,4 +1,4 @@
-.PHONY: all deps rust lsp fish symlink audit clean clean-backups dry-run help
+.PHONY: all deps rust lsp fish symlink update audit clean clean-backups dry-run help
 
 # Default target
 all: deps rust lsp fish symlink
@@ -22,6 +22,10 @@ fish:
 # Create symlinks only
 symlink:
 	@./install.sh --symlink
+
+# Update all dependencies to latest versions
+update:
+	@./install.sh --update
 
 # Audit Homebrew packages for vulnerabilities
 audit:
@@ -67,6 +71,7 @@ help:
 	@echo "  lsp             Install LSP servers"
 	@echo "  fish            Build fish from source"
 	@echo "  symlink         Create symlinks only"
+	@echo "  update          Update all dependencies to latest versions"
 	@echo "  audit           Audit Homebrew packages for vulnerabilities"
 	@echo "  dry-run         Preview all changes"
 	@echo "  clean           Remove symlinks"
