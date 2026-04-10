@@ -1,4 +1,4 @@
-.PHONY: all deps rust lsp fish symlink clean clean-backups dry-run help
+.PHONY: all deps rust lsp fish symlink audit clean clean-backups dry-run help
 
 # Default target
 all: deps rust lsp fish symlink
@@ -23,6 +23,10 @@ fish:
 symlink:
 	@./install.sh --symlink
 
+# Audit Homebrew packages for vulnerabilities
+audit:
+	@./install.sh --audit
+
 # Preview what would be done
 dry-run:
 	@./install.sh --dry-run --all
@@ -43,6 +47,7 @@ clean:
 	@rm -f ~/.gitconfig 2>/dev/null || true
 	@rm -f ~/.gitattributes 2>/dev/null || true
 	@rm -f ~/.commit-template.txt 2>/dev/null || true
+	@rm -f ~/.wgetrc 2>/dev/null || true
 	@echo "Done. Symlinks removed."
 
 # Remove backup files left by install.sh
@@ -56,12 +61,13 @@ help:
 	@echo "Usage: make [target]"
 	@echo ""
 	@echo "Targets:"
-	@echo "  all             Install everything (deps + rust + lsp + fish + symlinks)"
+	@echo "  all             Install everything (deps + rust + lsp + fish + symlinks + audit)"
 	@echo "  deps            Install Homebrew dependencies"
 	@echo "  rust            Install Rust stable toolchain"
 	@echo "  lsp             Install LSP servers"
 	@echo "  fish            Build fish from source"
 	@echo "  symlink         Create symlinks only"
+	@echo "  audit           Audit Homebrew packages for vulnerabilities"
 	@echo "  dry-run         Preview all changes"
 	@echo "  clean           Remove symlinks"
 	@echo "  clean-backups   Remove *.backup.* files left by install.sh"

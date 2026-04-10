@@ -33,6 +33,10 @@ brew "gh"
 brew "git-filter-repo"
 brew "git-lfs"
 
+# Security & supply-chain tools
+tap "homebrew/brew-vulns"
+brew "homebrew/brew-vulns/brew-vulns"
+
 # Container & supply-chain tools
 brew "cosign"
 brew "crane"
@@ -72,8 +76,6 @@ cask "gimp"
 cask "rectangle"
 
 # Unsorted (new since last organization)
-tap "anchore/grant"
-tap "anchore/grype"
 tap "homebrew/bundle"
 brew "lima"
 brew "syft"
