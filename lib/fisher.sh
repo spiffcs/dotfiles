@@ -31,7 +31,7 @@ bootstrap_fisher() {
   elif ! "${fish_bin}" -c 'type -q fisher' 2>/dev/null; then
     run_with_spinner "Installing Fisher and plugins" \
       "${fish_bin}" -c '
-        curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source
+        curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/4.4.8/functions/fisher.fish | source
         fisher install jorgebucaran/fisher
         fisher update
       '

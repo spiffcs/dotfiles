@@ -99,7 +99,7 @@ symlink_fish_config() {
 
   # Ensure fish config directories exist as real directories
   local dir
-  for dir in "${fish_dir}" "${fish_dir}/conf.d" "${fish_dir}/functions"; do
+  for dir in "${fish_dir}" "${fish_dir}/conf.d" "${fish_dir}/functions" "${fish_dir}/completions"; do
     if [[ -L "${dir}" ]]; then
       if ${DRY_RUN}; then
         print_dry "Would remove directory symlink: ${dir}"
@@ -146,6 +146,36 @@ symlink_fish_config() {
   create_symlink "${DOTFILES_DIR}/.config/fish/functions/fish_greeting.fish" "${fish_dir}/functions/fish_greeting.fish"
 }
 
+# Generates fish shell completions for installed tools.
+# Writes to ~/.config/fish/completions/ which fish sources automatically.
+generate_fish_completions() {
+  local comp_dir="${HOME}/.config/fish/completions"
+
+  if command -v uv &>/dev/null; then
+    if ${DRY_RUN}; then
+      print_dry "Would generate: ${comp_dir}/uv.fish"
+    else
+      uv generate-shell-completion fish > "${comp_dir}/uv.fish"
+      print_success "Generated: ${comp_dir}/uv.fish"
+    fi
+  else
+    print_warning "uv not found — skipping completion generation"
+  fi
+
+  local conf_dir="${HOME}/.config/fish/conf.d"
+
+  if command -v fzf &>/dev/null; then
+    if ${DRY_RUN}; then
+      print_dry "Would generate: ${conf_dir}/fzf.fish"
+    else
+      fzf --fish > "${conf_dir}/fzf.fish"
+      print_success "Generated: ${conf_dir}/fzf.fish"
+    fi
+  else
+    print_warning "fzf not found — skipping fzf shell integration"
+  fi
+}
+
 do_symlink() {
   print_info "Creating symlinks..."
   echo
@@ -169,6 +199,7 @@ do_symlink() {
   symlink_root_file ".gitconfig"
   symlink_root_file ".gitattributes"
   symlink_root_file ".commit-template.txt"
+  symlink_root_file ".wgetrc"
   echo
 
   print_info "Installing nvim plugins..."
@@ -181,6 +212,10 @@ do_symlink() {
   else
     print_warning "nvim not found — skipping plugin install (run --deps first)"
   fi
+  echo
+
+  print_info "Generating fish shell completions..."
+  generate_fish_completions
   echo
 
   if [[ ! -f "${HOME}/.gitconfig.local" ]]; then

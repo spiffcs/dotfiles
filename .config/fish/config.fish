@@ -13,16 +13,14 @@ set PATH ~/.local/bin $PATH
 set PATH ~/.opam/default/bin $PATH
 set PATH $HOME/.cargo/bin $PATH
 
-# Generate uv completions file if missing (delete ~/.config/fish/completions/uv.fish to regenerate)
-if command -q uv
-    set -l comp ~/.config/fish/completions/uv.fish
-    if not test -f $comp
-        uv generate-shell-completion fish >$comp
-    end
+# Generate cached shell integrations if missing (bootstrap handles this, fallback for manual installs)
+if command -q uv; and not test -f ~/.config/fish/completions/uv.fish
+    uv generate-shell-completion fish > ~/.config/fish/completions/uv.fish
+end
+if command -q fzf; and not test -f ~/.config/fish/conf.d/fzf.fish
+    fzf --fish > ~/.config/fish/conf.d/fzf.fish
 end
 
-# Set up fzf key bindings
-fzf --fish | source
 set -x FZF_DEFAULT_COMMAND 'fd --type f --hidden --follow --exclude .git'
 
 if status is-interactive
