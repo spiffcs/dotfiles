@@ -7,6 +7,7 @@ Personal configuration files.
 | Tool | Description |
 |------|-------------|
 | **Neovim** | IDE-like editor with LSP, completion, Treesitter, DAP debugger |
+| **Zed** | GUI editor with vim mode, Gruvbox theme, LSP, and Nerd-Font terminal |
 | **Fish** | Shell with vi bindings, Tide prompt, Gruvbox theme, fzf integration |
 | **Ghostty** | GPU-accelerated terminal with Gruvbox theme |
 | **Git** | Aliases, commit signing, color configuration |
@@ -175,6 +176,49 @@ Built from source via `--fish`. Managed by [Fisher](https://github.com/jorgebuca
 **Aliases:**
 - `xdg-open` -> `open` (Linux compatibility)
 
+### Zed Editor
+
+A starter config aimed at users coming from Neovim. Lives at
+`.config/zed/settings.json` (Zed's canonical location).
+
+**Highlights:**
+
+| Setting | Value | Why |
+|---------|-------|-----|
+| `theme` | `Gruvbox Dark Hard` | Match Ghostty + Neovim (requires the *Gruvbox* extension) |
+| `buffer_font_family` / `ui_font_family` | `FiraCode Nerd Font` | Consistent typeface across editor + terminal |
+| `vim_mode` | `true` | Modal editing parity with Neovim |
+| `relative_line_numbers` | `true` | Matches `vim.o.relativenumber` in `init.lua` |
+| `format_on_save` | `"on"` | Parity with `conform.nvim` setup |
+| `remove_trailing_whitespace_on_save` | `true` | Parity with `vim-better-whitespace` |
+| `terminal.font_family` | `FiraCode Nerd Font` | Renders Tide prompt icons |
+| `terminal.shell.program` | `fish` | Use the configured fish shell |
+| `telemetry` | `{ metrics: false, diagnostics: false }` | Privacy default |
+
+Per-language `tab_size` / `hard_tabs` mirror the `set_indentation(...)`
+table in `nvim/init.lua` (Go uses hard tabs, Python uses 4, Lua/HTML/JS/R/Scala use 2).
+
+**Neovim → Zed cheatsheet** (defaults that work without extra keymap config):
+
+| Neovim | Zed | Action |
+|--------|-----|--------|
+| `<leader>r` (FZF) | `cmd+p` | Open file finder |
+| `<leader>fw` (`:Rg`) | `cmd+shift+f` | Project-wide search |
+| `<C-n>` (nvim-tree) | `cmd+shift+e` | Toggle project panel |
+| `K` | `K` (vim mode) or hover | Hover docs |
+| `gd` | `gd` (vim mode) or `f12` | Go to definition |
+| `grr` | `cmd+click` / `shift+f12` | Find references |
+| `grn` / `<leader>rn` | `f2` | Rename symbol |
+| `gra` | `cmd+.` | Code action |
+| `<leader>d` | `f8` / `shift+f8` | Next / previous diagnostic |
+| `:bnext` / `:bprev` | `cmd+shift+]` / `cmd+shift+[` | Cycle tabs |
+| `<C-w>` window splits | `cmd+k` then arrow | Split panes |
+
+**Prerequisites:**
+- Install the **Gruvbox** theme extension from Zed's extensions panel (`cmd+shift+X`).
+- LSP servers (gopls, pyright, ruff, rust-analyzer, lua-language-server) are
+  installed by `make lsp` / `make deps` and reused by Zed automatically.
+
 ### Ghostty Terminal
 
 ```
@@ -327,6 +371,8 @@ dotfiles/
 │   │   └── config
 │   ├── git/
 │   │   └── ignore                   # Global gitignore (XDG default)
+│   ├── zed/
+│   │   └── settings.json            # Zed editor: vim mode, gruvbox, Nerd-Font terminal
 │   └── nvim/
 │       ├── init.lua
 │       ├── lazy-lock.json           # Plugin version lockfile

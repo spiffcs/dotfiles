@@ -80,3 +80,8 @@ tap "homebrew/bundle"
 brew "lima"
 brew "syft"
 brew "libmagic"
+
+# Unsorted (new since last organization)
+tap "anchore/grant"
+tap "anchore/grype"
+brew "pre-commit"

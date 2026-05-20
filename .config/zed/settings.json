@@ -1,0 +1,89 @@
+// Zed editor configuration — https://zed.dev/docs/configuring-zed
+//
+// Geared toward a Neovim user. Highlights:
+//   - terminal uses FiraCode Nerd Font so Tide prompt icons render
+//   - vim mode + relative line numbers
+//   - format-on-save with per-language settings mirroring init.lua
+//   - Gruvbox theme to match Ghostty / Neovim (requires the
+//     "Gruvbox" Zed extension: cmd+shift+X -> search "Gruvbox")
+{
+  "$schema": "https://zed.dev/schema/settings.json",
+
+  // ── Theme & fonts ────────────────────────────────────────────────
+  "theme": "Gruvbox Material",
+  "buffer_font_family": "FiraCode Nerd Font",
+  "buffer_font_size": 14,
+  "ui_font_family": "FiraCode Nerd Font",
+  "ui_font_size": 14,
+
+  // ── Modal editing (familiar from Neovim) ─────────────────────────
+  "vim_mode": true,
+  "relative_line_numbers": true,
+  "cursor_blink": false,
+  "current_line_highlight": "line",
+
+  // ── Editor behavior ──────────────────────────────────────────────
+  "tab_size": 4,
+  "soft_wrap": "editor_width",
+  "format_on_save": "on",
+  "remove_trailing_whitespace_on_save": true,
+  "ensure_final_newline_on_save": true,
+  "show_whitespaces": "selection",
+  "inlay_hints": { "enabled": true },
+  "scrollbar": { "show": "auto" },
+  "tabs": { "git_status": true, "file_icons": true },
+
+  // ── Terminal ─────────────────────────────────────────────────────
+  // Without font_family set, Zed's terminal falls back to a font that
+  // lacks Nerd Font glyphs, so the Tide prompt renders empty boxes.
+  "terminal": {
+    "font_family": "FiraCode Nerd Font",
+    "font_size": 14,
+    "shell": { "program": "fish" },
+    "blinking": "off",
+    "copy_on_select": true,
+    "working_directory": "current_project_directory"
+  },
+
+  // ── Panels ───────────────────────────────────────────────────────
+  "project_panel": { "dock": "left", "default_width": 240 },
+  "outline_panel": { "dock": "right" },
+
+  // ── Git ──────────────────────────────────────────────────────────
+  "git": {
+    "git_gutter": "tracked_files",
+    "inline_blame": { "enabled": true, "delay_ms": 500 }
+  },
+
+  // ── Per-language settings (mirror nvim/init.lua) ─────────────────
+  "languages": {
+    "Go": { "tab_size": 4, "hard_tabs": true },
+    "Python": {
+      "tab_size": 4,
+      "language_servers": ["pyright", "ruff"],
+      "formatter": [
+        { "code_actions": { "source.organizeImports.ruff": true } },
+        { "language_server": { "name": "ruff" } }
+      ]
+    },
+    "Lua": { "tab_size": 2 },
+    "HTML": { "tab_size": 2 },
+    "JavaScript": { "tab_size": 2 },
+    "TypeScript": { "tab_size": 2 },
+    "Makefile": { "tab_size": 4, "hard_tabs": true },
+    "R": { "tab_size": 2 },
+    "Scala": { "tab_size": 2 },
+    "Rust": { "tab_size": 4 }
+  },
+
+  // ── Telemetry off (matches the rest of this dotfiles posture) ────
+  "telemetry": { "diagnostics": false, "metrics": false },
+
+  // ── Agent (AI assistant) ─────────────────────────────────────────
+  // Skip the per-action "Allow?" prompt for every agent tool call,
+  // including shell commands. Convenient, but the agent can now run
+  // commands without asking — only enable in trusted projects.
+  "agent": {
+    "always_allow_tool_actions": true
+  }
+}

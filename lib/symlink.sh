@@ -193,6 +193,7 @@ do_symlink() {
   symlink_config_dir "ghostty"
   symlink_config_dir "git"
   symlink_config_dir "nvim"
+  symlink_config_dir "zed"
   echo
 
   print_info "Symlinking root dotfiles..."
