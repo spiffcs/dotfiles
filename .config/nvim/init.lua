@@ -48,7 +48,22 @@ require("lazy").setup({
 	{
 		"nvim-tree/nvim-tree.lua",
 		dependencies = { "nvim-tree/nvim-web-devicons" },
-		opts = {},
+		opts = {
+			on_attach = function(bufnr)
+				local api = require("nvim-tree.api")
+				-- Load the default mappings first, then override.
+				api.config.mappings.default_on_attach(bufnr)
+
+				local function opts(desc)
+					return { desc = "nvim-tree: " .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
+				end
+
+				-- NERDTree-style splits; default `s` was system-open (opened files in GoLand).
+				vim.keymap.set("n", "s", api.node.open.vertical, opts("Open: Vertical Split"))
+				vim.keymap.set("n", "i", api.node.open.horizontal, opts("Open: Horizontal Split"))
+				vim.keymap.set("n", "t", api.node.open.tab, opts("Open: New Tab"))
+			end,
+		},
 	},
 	{ "ellisonleao/glow.nvim", opts = {} },
 

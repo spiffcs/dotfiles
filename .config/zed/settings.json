@@ -7,6 +7,11 @@
 //   - Gruvbox theme to match Ghostty / Neovim (requires the
 //     "Gruvbox" Zed extension: cmd+shift+X -> search "Gruvbox")
 {
+  "agent_servers": {
+    "claude-acp": {
+      "type": "registry"
+    }
+  },
   "$schema": "https://zed.dev/schema/settings.json",
 
   // ── Theme & fonts ────────────────────────────────────────────────
